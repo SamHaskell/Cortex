@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "k5TiOaJsc8C/jh59m7jpLLYbyZw1SVG6MbRu7hVAlDIDFJn4nx/M0l4whbq+lctvYu/sec04L01etjO4+lIoXA==",
+  "success": true,
+  "projectFilePath": "/Users/sam/Documents/MonoGame/Cortex/Cortex.csproj",
+  "expectedPackageFiles": [
+    "/Users/sam/.nuget/packages/monogame.content.builder.task/3.8.1.303/monogame.content.builder.task.3.8.1.303.nupkg.sha512",
+    "/Users/sam/.nuget/packages/monogame.framework.desktopgl/3.8.1.303/monogame.framework.desktopgl.3.8.1.303.nupkg.sha512"
+  ],
+  "logs": []
+}
