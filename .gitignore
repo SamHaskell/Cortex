@@ -1,0 +1,12 @@
+*.DS_Store
+*.config
+*.vscode
+[Bb]in
+obj/
+[Dd]ebug*/
+[Rr]elease*/
+*.user
+*.userprefs
+*.exe
+
+[Bb]uild*/
