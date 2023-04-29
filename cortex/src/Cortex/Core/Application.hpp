@@ -14,6 +14,8 @@ namespace Cortex
         b8 Init();
         b8 Run();
         b8 Shutdown();
+        void OnEvent(Event& e);
+        b8 OnWindowClose(WindowCloseEvent& e);
     private:
         b8 m_Finished;
         b8 m_Suspended;

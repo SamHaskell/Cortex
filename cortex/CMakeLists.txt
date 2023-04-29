@@ -20,6 +20,11 @@ set(
     ${Cortex_SOURCE_DIR}/src/Cortex/Utils/Defines.h
     ${Cortex_SOURCE_DIR}/src/Cortex/Utils/Logging.hpp
 
+    ${Cortex_SOURCE_DIR}/src/Cortex/Events/Event.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Events/KeyEvent.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Events/MouseEvent.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Events/SystemEvent.hpp
+
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Application.hpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Entrypoint.hpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Window.hpp

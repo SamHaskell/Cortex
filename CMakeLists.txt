@@ -8,6 +8,8 @@ project(
     LANGUAGES CXX
 )
 
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
+
 # Cortex Engine dylib compiled here
 add_subdirectory(Cortex)
 

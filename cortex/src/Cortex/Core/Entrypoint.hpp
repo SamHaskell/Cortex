@@ -9,13 +9,13 @@ extern Cortex::Application* Cortex::CreateApplication();
 int main (int argc, char** argv) {
     auto app = Cortex::CreateApplication();
     if (!app->Init()) {
-        // TODO: ERROR HANDLING
+        CX_FATAL("Application failed to Initialise.");
     }
     if (!app->Run()) {
-        // TODO: ERROR HANDLING
+        CX_FATAL("Application failed to Run.");
     }
     if (!app->Shutdown()) {
-        // TODO: ERROR HANDLING
+        CX_FATAL("Application did not shut down successfully.");
     }
     delete app;
 }
