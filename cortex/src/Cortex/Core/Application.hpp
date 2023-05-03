@@ -2,7 +2,7 @@
 
 #include "Cortex/Utils/Asserts.h"
 
-#include "Cortex/Core/Window.hpp"
+#include "Cortex/Graphics/Renderer.hpp"
 
 namespace Cortex
 {
@@ -11,15 +11,15 @@ namespace Cortex
     public:
         Application();
         virtual ~Application();
-        b8 Init();
         b8 Run();
-        b8 Shutdown();
-        void OnEvent(Event& e);
-        b8 OnWindowClose(WindowCloseEvent& e);
+        void OnEvent(Event &e);
+        b8 OnWindowClose(WindowCloseEvent &e);
+        b8 OnWindowFramebufferResize(WindowFramebufferResizeEvent &e);
+
     private:
         b8 m_Finished;
         b8 m_Suspended;
-        Window* p_Window;
+        std::unique_ptr<Renderer> p_Renderer;
     };
 
     Application *CreateApplication();

@@ -21,14 +21,15 @@ namespace Cortex
         WindowClose = 2,
         WindowMove = 3,
         WindowResize = 4,
-        WindowFocus = 5,
-        WindowDefocus = 6,
-        KeyPress = 7,
-        KeyRelease = 8,
-        MouseButtonPress = 9,
-        MouseButtonRelease = 10,
-        MouseMove = 11,
-        MouseScroll = 12,
+        WindowFramebufferResize = 5,
+        WindowFocus = 6,
+        WindowDefocus = 7,
+        KeyPress = 8,
+        KeyRelease = 9,
+        MouseButtonPress = 10,
+        MouseButtonRelease = 11,
+        MouseMove = 12,
+        MouseScroll = 13,
     };
 
     typedef enum EventCategory
@@ -57,7 +58,7 @@ namespace Cortex
         }
 
     protected:
-        b8 m_Resolved = CX_FALSE;
+        b8 m_Resolved = false;
     };
 
     class EventDispatcher
@@ -76,9 +77,9 @@ namespace Cortex
             if (m_Event.GetEventType() == T::GetStaticType())
             {
                 m_Event.m_Resolved = func(*(T *)&m_Event); // Cast m_Event to T, then call func() on it.
-                return CX_TRUE;
+                return true;
             }
-            return CX_FALSE;
+            return false;
         }
 
     private:

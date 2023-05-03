@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cortex/Utils/Asserts.h"
+#include "Cortex/Utils/Defines.h"
 
 /*
     Logging has 6 levels, final two CX_DEBUG and CX_TRACE are for debug builds only.

@@ -7,58 +7,43 @@ namespace Cortex
 {
     Application::Application()
     {
+        CX_INFO("Engine Initialising ...");
+
+        m_Finished = false;
+        m_Suspended = false;
+
+        RendererConfigInfo rendererConfig = {};
+
+        p_Renderer = std::make_unique<Renderer>(rendererConfig);
+        p_Renderer->SetWindowEventCallback(std::bind(&Application::OnEvent, this, std::placeholders::_1));
     }
     Application::~Application()
     {
-    }
-    b8 Application::Init()
-    {
-        /* TODO: THIS IS WHERE WE START UP ENGINE SUBSYSTEMS.
-           With few exceptions, if we start something up here, we should
-           call the corresponding Shutdown() method in the application Shutdown().
-           The shutdown calls should occur in reverse order to the Init() calls. */
-        CX_INFO("Engine Initialising ...");
-
-        m_Finished = CX_FALSE;
-        m_Suspended = CX_FALSE;
-
-        p_Window = new Window();
-        p_Window -> SetEventCallback(std::bind(&Application::OnEvent, this, std::placeholders::_1));
-
-        if (!p_Window->Init("Cortex Application", 1080, 720))
-        {
-            return CX_FALSE;
-        }
-
-        return CX_TRUE;
     }
     b8 Application::Run()
     {
         while (!m_Finished)
         {
-            p_Window->Update(m_Suspended);
-        }
+            p_Renderer -> BeginFrame();
 
-        return CX_TRUE;
+            p_Renderer -> EndFrame();
+        }
+        return true;
     }
-    b8 Application::Shutdown()
+    void Application::OnEvent(Event &e)
     {
-
-        if (!p_Window->Shutdown())
-        {
-            return CX_FALSE;
-        }
-        delete p_Window;
-
-        return CX_TRUE;
-    }
-    void Application::OnEvent(Event& e){
         EventDispatcher dispatcher(e);
         dispatcher.Dispatch<WindowCloseEvent>(std::bind(&Application::OnWindowClose, this, std::placeholders::_1));
-        CX_TRACE(e.ToString().c_str());
+        dispatcher.Dispatch<WindowFramebufferResizeEvent>(std::bind(&Application::OnWindowFramebufferResize, this, std::placeholders::_1));
     }
-    b8 Application::OnWindowClose(WindowCloseEvent& e) {
-        m_Finished = CX_TRUE;
-        return CX_TRUE;
+    b8 Application::OnWindowClose(WindowCloseEvent &e)
+    {
+        m_Finished = true;
+        return true;
+    }
+    b8 Application::OnWindowFramebufferResize(WindowFramebufferResizeEvent &e)
+    {
+        CX_INFO("%s", e.ToString().c_str());
+        return true;
     }
 }
