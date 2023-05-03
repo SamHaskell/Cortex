@@ -27,7 +27,14 @@ set(
 
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Application.hpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Entrypoint.hpp
-    ${Cortex_SOURCE_DIR}/src/Cortex/Core/Window.hpp
+
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/Window.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/Renderer.hpp
+
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RenderBackend.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RenderContext.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RenderDevice.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/Swapchain.hpp
 )
 
 set(
@@ -36,7 +43,14 @@ set(
     ${Cortex_SOURCE_DIR}/src/Cortex/Utils/Logging.cpp
 
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Application.cpp
-    ${Cortex_SOURCE_DIR}/src/Cortex/Core/Window.cpp
+
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/Window.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/Renderer.cpp
+
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RenderBackend.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RenderContext.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RenderDevice.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/Swapchain.cpp
 )
 
 add_library(

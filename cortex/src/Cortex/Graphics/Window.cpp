@@ -1,26 +1,16 @@
-#include "Cortex/Core/Window.hpp"
+#include "Cortex/Graphics/Window.hpp"
 #include "Cortex/Utils/Logging.hpp"
 
 namespace Cortex
 {
-    Window::Window()
+    Window::Window(const char *title, u32 width, u32 height)
     {
-    }
-    Window::~Window()
-    {
-    }
-    b8 Window::Init(const char *title, u32 width, u32 height)
-    {
-        glfwSetErrorCallback([](i32 code, const char* msg) {
-            CX_ERROR("GLFW Error %i: %s", code, msg);
-        });
+        b8 result = glfwInit();
+        CX_ASSERT(result);
 
         m_WindowData.Title = title;
         m_WindowData.Width = width;
         m_WindowData.Height = height;
-
-        b8 result = glfwInit();
-        CX_ASSERT(result);
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
@@ -29,42 +19,44 @@ namespace Cortex
         glfwGetWindowPos(m_WindowInstance, &m_WindowData.PositionX, &m_WindowData.PositionY);
         glfwSetWindowUserPointer(m_WindowInstance, &m_WindowData);
 
-        WindowCreateEvent e(m_WindowData.Title, m_WindowData.Width, m_WindowData.Height);
-        m_WindowData.EventCallback(e);
-
         InitWindowCallbacks();
         InitKeyCallbacks();
         InitMouseCallbacks();
 
-        return CX_TRUE;
+        glfwGetFramebufferSize(m_WindowInstance, &m_WindowData.FramebufferWidth, &m_WindowData.FramebufferHeight);
+
+        glfwSetErrorCallback([](i32 code, const char *msg)
+                             { CX_ERROR("GLFW Error %i: %s", code, msg); });
     }
-    b8 Window::Update(b8 suspended)
-    {
-        glfwPollEvents(); // Still need to poll events even while App does not have focus, so that it can regain focus.
-        if (!suspended) {
-            // Graphics should not be rendered while App is running in background.
-        }
-        return CX_TRUE;
-    }
-    b8 Window::Shutdown()
+
+    Window::~Window()
     {
         glfwDestroyWindow(m_WindowInstance);
         glfwTerminate();
-        return CX_TRUE;
     }
+
+    void Window::Update()
+    {
+        glfwPollEvents();
+    }
+
     void Window::SetEventCallback(const EventCallback &cb)
     {
         m_WindowData.EventCallback = cb;
     }
+
     void Window::InitWindowCallbacks()
     {
         glfwSetWindowSizeCallback(m_WindowInstance, [](GLFWwindow *window, i32 w, i32 h)
                                   {
-            WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
-            WindowResizeEvent e(data.Title, (u32) w, (u32) h);
-            data.Width = (u32) w;
-            data.Height = (u32) h;
-            data.EventCallback(e); });
+                                      WindowData &data = *(WindowData *)glfwGetWindowUserPointer(window);
+                                      data.Width = (u32)w;
+                                      data.Height = (u32)h;
+                                      glfwGetFramebufferSize(window, &data.FramebufferWidth, &data.FramebufferHeight);
+                                      WindowResizeEvent e1(data.Title, (u32)w, (u32)h);
+                                      WindowFramebufferResizeEvent e2((u32)data.FramebufferWidth, (u32)data.FramebufferHeight);
+                                      data.EventCallback(e1);
+                                      data.EventCallback(e2); });
 
         glfwSetWindowCloseCallback(m_WindowInstance, [](GLFWwindow *window)
                                    {
@@ -98,8 +90,8 @@ namespace Cortex
                            {
             WindowData& data = *(WindowData*)glfwGetWindowUserPointer(window);
             switch (action) {
-                case GLFW_PRESS : { KeyPressEvent e(key, CX_FALSE); data.EventCallback(e); break; };
-                case GLFW_REPEAT : { KeyPressEvent e(key, CX_TRUE); data.EventCallback(e); break; };
+                case GLFW_PRESS : { KeyPressEvent e(key, false); data.EventCallback(e); break; };
+                case GLFW_REPEAT : { KeyPressEvent e(key, true); data.EventCallback(e); break; };
                 case GLFW_RELEASE : { KeyReleaseEvent e(key); data.EventCallback(e); break; };
             } });
     }
@@ -126,5 +118,10 @@ namespace Cortex
                 case GLFW_REPEAT : { MouseButtonPressEvent e(button); data.EventCallback(e); break; };
                 case GLFW_RELEASE : { MouseButtonReleaseEvent e(button); data.EventCallback(e); break; };
             } });
+    }
+
+    void Window::CreateVulkanSurface(const VkInstance instance, VkSurfaceKHR& surface) {
+        VkResult result = glfwCreateWindowSurface(instance, m_WindowInstance, nullptr, &surface);
+        CX_ASSERT_MSG(result == VK_SUCCESS, "GLFW failed to create a Vulkan surface");
     }
 }

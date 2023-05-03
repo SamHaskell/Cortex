@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-static const char* logLevelLabels[6] = {
+static const char *logLevelLabels[6] = {
     "[FATAL]",
     "[ERROR]",
     "[WARN]",
@@ -11,9 +11,9 @@ static const char* logLevelLabels[6] = {
     "[TRACE]",
 };
 
-static const char* logLevelColors[6] = {
+static const char *logLevelColors[6] = {
     "\e[0;31m",
-    "\e[0;31m",        
+    "\e[0;31m",
     "\e[0;33m",
     "\e[0;32m",
     "\e[0;36m",
@@ -22,7 +22,8 @@ static const char* logLevelColors[6] = {
 
 // TODO: Find a not-so-messy way to do this.
 
-void CoreLog(LogLevel verbosity, const char* msg, const char* file, i32 line, ...) {
+void CoreLog(LogLevel verbosity, const char *msg, const char *file, i32 line, ...)
+{
     int buffer_size = 16000;
     char output[buffer_size];
     memset(output, 0, sizeof(output));

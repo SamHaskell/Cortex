@@ -5,7 +5,8 @@
 #include "Cortex/Utils/Logging.hpp"
 
 #include "Cortex/Core/Application.hpp"
-#include "Cortex/Core/Window.hpp"
+
+#include "Cortex/Graphics/Window.hpp"
 
 // --------- ENTRY POINT ---------- //
 

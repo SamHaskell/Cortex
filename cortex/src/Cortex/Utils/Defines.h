@@ -20,7 +20,6 @@ typedef float f32;
 typedef double f64;
 
 typedef char b8;
-typedef int b32;
 
 STATIC_ASSERT(sizeof(u8) == 1, "Expected u8 to be 1 byte(s).");
 STATIC_ASSERT(sizeof(u16) == 2, "Expected u16 to be 2 byte(s).");
@@ -36,20 +35,16 @@ STATIC_ASSERT(sizeof(f32) == 4, "Expected f32 to be 4 byte(s).");
 STATIC_ASSERT(sizeof(f64) == 8, "Expected f64 to be 8 byte(s).");
 
 STATIC_ASSERT(sizeof(b8) == 1, "Expected b8 to be 1 byte(s).");
-STATIC_ASSERT(sizeof(b32) == 4, "Expected b32 to be 4 byte(s).");
-
-#define CX_TRUE 1
-#define CX_FALSE 0
 
 #ifdef __APPLE__
-    #define CX_PLATFORM_APPLE 1
-    #include <TargetConditionals.h>
-    #if TARGET_OS_MAC
-        #define CX_PLATFORM_MACOS 1
-        // MacOS specific stuff
-    #else
-        #error "Cortex only supports MacOS Desktops at this time."
-    #endif
+#define CX_PLATFORM_APPLE 1
+#include <TargetConditionals.h>
+#if TARGET_OS_MAC
+#define CX_PLATFORM_MACOS 1
+// MacOS specific stuff
 #else
-    #error "Cortex only supports Apple platforms at this time."
+#error "Cortex only supports MacOS Desktops at this time."
+#endif
+#else
+#error "Cortex only supports Apple platforms at this time."
 #endif

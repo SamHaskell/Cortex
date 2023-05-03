@@ -130,6 +130,36 @@ namespace Cortex
         u32 m_Height;
     };
 
+    class WindowFramebufferResizeEvent : public Event
+    {
+    public:
+        WindowFramebufferResizeEvent(u32 width, u32 height)
+        {
+            m_Width = width;
+            m_Height = height;
+        }
+
+        inline u32 GetWidth() { return m_Width; }
+        inline u32 GetHeight() { return m_Height; }
+
+        std::string ToString() const override
+        {
+            char output[128];
+            memset(output, 0, sizeof(output));
+            snprintf(output, sizeof(output), "WindowFramebufferResizeEvent: Dimensions: (%i, %i)", m_Width, m_Height);
+            return std::string(output);
+        }
+
+        static EventType GetStaticType() { return EventType::WindowFramebufferResize; }
+        virtual EventType GetEventType() const override { return GetStaticType(); }
+        virtual const char *GetName() const override { return "WindowFramebufferResizeEvent"; }
+        virtual i32 GetCategoryFlags() const override { return EVENT_WINDOW_BIT | EVENT_SYSTEM_BIT; }
+
+    private:
+        u32 m_Width;
+        u32 m_Height;
+    };
+
     class WindowFocusEvent : public Event
     {
     public:
