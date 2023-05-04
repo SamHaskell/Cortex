@@ -12,10 +12,11 @@ namespace Cortex
         m_Finished = false;
         m_Suspended = false;
 
-        RendererConfigInfo rendererConfig = {};
+        m_Window = std::make_unique<Window>("Cortex Application", 800, 600);
+        m_Window->SetEventCallback(std::bind(&Application::OnEvent, this, std::placeholders::_1));
 
-        p_Renderer = std::make_unique<Renderer>(rendererConfig);
-        p_Renderer->SetWindowEventCallback(std::bind(&Application::OnEvent, this, std::placeholders::_1));
+        m_Renderer = std::make_unique<Renderer>(m_Window);
+        m_Renderer->Init();
     }
     Application::~Application()
     {
@@ -24,9 +25,7 @@ namespace Cortex
     {
         while (!m_Finished)
         {
-            p_Renderer -> BeginFrame();
-
-            p_Renderer -> EndFrame();
+            m_Window->Update();
         }
         return true;
     }
@@ -43,7 +42,7 @@ namespace Cortex
     }
     b8 Application::OnWindowFramebufferResize(WindowFramebufferResizeEvent &e)
     {
-        CX_INFO("%s", e.ToString().c_str());
+        m_Renderer->OnWindowFramebufferResize(e);
         return true;
     }
 }
