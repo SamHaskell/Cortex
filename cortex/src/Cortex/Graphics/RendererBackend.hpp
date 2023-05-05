@@ -33,7 +33,9 @@ namespace Cortex
         RendererBackend(const std::unique_ptr<Window> &window);
         ~RendererBackend();
 
+        inline const VkSurfaceKHR& GetSurface() { return m_Surface; }
         inline const VkDevice& GetDevice() { return m_Device; }
+        inline const VkCommandPool& GetCommandPool() { return m_CommandPool; }
 
         inline const DeviceQueueDetails GetQueueDetails() { return QueryQueueDetails(m_PhysicalDevice); }
         inline const DeviceSwapchainSupportDetails GetSwapchainSupportDetails() { return QuerySwapchainSupportDetails(m_PhysicalDevice); }

@@ -7,8 +7,6 @@ namespace Cortex
 {
     Application::Application()
     {
-        CX_INFO("Engine Initialising ...");
-
         m_Finished = false;
         m_Suspended = false;
 
@@ -26,6 +24,7 @@ namespace Cortex
         while (!m_Finished)
         {
             m_Window->Update();
+            m_Renderer->DrawTestFrame();
         }
         return true;
     }

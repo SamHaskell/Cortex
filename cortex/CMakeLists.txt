@@ -78,3 +78,13 @@ target_compile_features(
     Cortex PUBLIC
     cxx_std_17
 )
+
+file(GLOB PROJECT_SHADERS assets/Shaders/*.comp
+                          assets/Shaders/*.frag
+                          assets/Shaders/*.geom
+                          assets/Shaders/*.vert)
+
+add_custom_command(
+    TARGET Cortex POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Cortex/assets/Shaders $<TARGET_FILE_DIR:Cortex>/assets
+    DEPENDS ${PROJECT_SHADERS})

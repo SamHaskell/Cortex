@@ -19,6 +19,7 @@ namespace Cortex
         Renderer(const std::unique_ptr<Window> &window);
         ~Renderer();
         b8 Init();
+        inline b8 DrawTestFrame() { return m_Context->DrawTestFrame(); }
         b8 Shutdown();
 
         b8 OnWindowFramebufferResize(WindowFramebufferResizeEvent &e);
