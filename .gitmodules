@@ -1,3 +1,6 @@
 [submodule "Cortex/vendor/glfw"]
 	path = Cortex/vendor/glfw
 	url = https://github.com/glfw/glfw.git
+[submodule "Cortex/vendor/glm"]
+	path = Cortex/vendor/glm
+	url = https://github.com/g-truc/glm.git

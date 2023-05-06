@@ -4,8 +4,15 @@
 
 #include "Cortex/Graphics/RendererBackend.hpp"
 
+#include "glm/glm.hpp"
+
 namespace Cortex
 {
+    struct Vertex {
+        glm::vec2 pos;
+        glm::vec3 color;
+    };
+
     class RendererContext
     {
     public:
@@ -35,7 +42,10 @@ namespace Cortex
         std::vector<char> ReadShader(const std::string& path);
 
     private:
+        const int MAX_FRAMES_IN_FLIGHT = 2;
         const VkDevice& m_DeviceHandle;
+        const VkQueue& m_GraphicsQueueHandle;
+        const VkQueue& m_PresentQueueHandle;
         VkSwapchainKHR m_Swapchain;
 
         std::vector<VkImage> m_SwapchainImages;
@@ -52,5 +62,8 @@ namespace Cortex
         std::vector<VkSemaphore> m_ImageAvailableSemaphores;
         std::vector<VkSemaphore> m_RenderFinishedSemaphores;
         std::vector<VkFence> m_FrameFlightFences;
+
+        u32 m_CurrentImageIndex = 0;
+        u32 m_CurrentFrame = 0;
     };
 }

@@ -13,7 +13,7 @@ namespace Cortex
         m_WindowData.Height = height;
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         m_WindowInstance = glfwCreateWindow(m_WindowData.Width, m_WindowData.Height, m_WindowData.Title, NULL, NULL);
 
         glfwGetWindowPos(m_WindowInstance, &m_WindowData.PositionX, &m_WindowData.PositionY);

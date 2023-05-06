@@ -62,6 +62,11 @@ target_include_directories(
     /Users/sam/VulkanSDK/1.3.243.0/macOS/include
 )
 
+target_include_directories(
+    Cortex PRIVATE
+    vendor/glm
+)
+
 target_link_directories(
     Cortex PUBLIC
     /Users/sam/VulkanSDK/1.3.243.0/macOS/lib

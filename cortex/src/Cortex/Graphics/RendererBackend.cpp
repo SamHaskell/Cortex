@@ -17,6 +17,8 @@ namespace Cortex
 
     RendererBackend::~RendererBackend()
     {
+        vkDeviceWaitIdle(m_Device);
+
         vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
         vkDestroyDevice(m_Device, nullptr);
         vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
@@ -128,6 +130,9 @@ namespace Cortex
 
         VkResult result = vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &device);
         CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to create a Vulkan Device");
+
+        vkGetDeviceQueue(device, queueDetails.GraphicsIndex, 0, &m_GraphicsQueue);
+        vkGetDeviceQueue(device, queueDetails.PresentIndex, 0, &m_PresentQueue);
 
         return device;
     }

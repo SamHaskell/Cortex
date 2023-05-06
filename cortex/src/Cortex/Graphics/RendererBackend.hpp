@@ -36,6 +36,8 @@ namespace Cortex
         inline const VkSurfaceKHR& GetSurface() { return m_Surface; }
         inline const VkDevice& GetDevice() { return m_Device; }
         inline const VkCommandPool& GetCommandPool() { return m_CommandPool; }
+        inline const VkQueue& GetGraphicsQueue() { return m_GraphicsQueue; }
+        inline const VkQueue& GetPresentQueue() { return m_PresentQueue; }
 
         inline const DeviceQueueDetails GetQueueDetails() { return QueryQueueDetails(m_PhysicalDevice); }
         inline const DeviceSwapchainSupportDetails GetSwapchainSupportDetails() { return QuerySwapchainSupportDetails(m_PhysicalDevice); }
@@ -64,5 +66,8 @@ namespace Cortex
         VkPhysicalDevice m_PhysicalDevice = VK_NULL_HANDLE;
         VkDevice m_Device;
         VkCommandPool m_CommandPool;
+
+        VkQueue m_GraphicsQueue;
+        VkQueue m_PresentQueue;
     };
 }

@@ -8,6 +8,8 @@ namespace Cortex
 {
     RendererContext::RendererContext(const std::unique_ptr<RendererBackend> &backend, u32 windowWidth, u32 windowHeight)
         : m_DeviceHandle(backend->GetDevice()),
+          m_GraphicsQueueHandle(backend->GetGraphicsQueue()),
+          m_PresentQueueHandle(backend->GetPresentQueue()),
           m_Swapchain(CreateSwapchain(backend, windowWidth, windowHeight)),
           m_SwapchainImages(RetrieveSwapchainImages()),
           m_SwapchainImageViews(CreateSwapchainImageViews()),
@@ -21,6 +23,8 @@ namespace Cortex
 
     RendererContext::~RendererContext()
     {
+        vkDeviceWaitIdle(m_DeviceHandle);
+
         for (size_t i = 0; i < m_FrameFlightFences.size(); i++) {
             vkDestroyFence(m_DeviceHandle, m_FrameFlightFences[i], nullptr);
             vkDestroySemaphore(m_DeviceHandle, m_RenderFinishedSemaphores[i], nullptr);
@@ -51,21 +55,25 @@ namespace Cortex
 
     b8 RendererContext::RenderBegin()
     {
-        vkWaitForFences(m_DeviceHandle, 1, &m_FrameFlightFences[0], VK_TRUE, UINT64_MAX);
-        vkResetFences(m_DeviceHandle, 1, &m_FrameFlightFences[0]);
+        vkWaitForFences(m_DeviceHandle, 1, &m_FrameFlightFences[m_CurrentFrame], VK_TRUE, UINT64_MAX);
+        vkResetFences(m_DeviceHandle, 1, &m_FrameFlightFences[m_CurrentFrame]);
+
+        vkAcquireNextImageKHR(m_DeviceHandle, m_Swapchain, UINT64_MAX, m_ImageAvailableSemaphores[m_CurrentFrame], VK_NULL_HANDLE, &m_CurrentImageIndex);
+
+        vkResetCommandBuffer(m_CommandBuffers[m_CurrentFrame], 0);
 
         VkCommandBufferBeginInfo beginInfo = {};
         beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
         beginInfo.flags = 0;
         beginInfo.pInheritanceInfo = nullptr;
 
-        VkResult result = vkBeginCommandBuffer(m_CommandBuffers[0], &beginInfo);
+        VkResult result = vkBeginCommandBuffer(m_CommandBuffers[m_CurrentFrame], &beginInfo);
         CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to begin recording Vulkan Command Buffer");
 
         VkRenderPassBeginInfo renderBeginInfo = {};
         renderBeginInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO;
         renderBeginInfo.renderPass = m_RenderPass;
-        renderBeginInfo.framebuffer = m_Framebuffers[0];
+        renderBeginInfo.framebuffer = m_Framebuffers[m_CurrentImageIndex];
         renderBeginInfo.renderArea.offset = {0, 0};
         renderBeginInfo.renderArea.extent = m_SwapchainImageExtent;
 
@@ -76,22 +84,57 @@ namespace Cortex
         renderBeginInfo.clearValueCount = 1;
         renderBeginInfo.pClearValues = &clearColor;
 
-        vkCmdBeginRenderPass(m_CommandBuffers[0], &renderBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
+        vkCmdBeginRenderPass(m_CommandBuffers[m_CurrentFrame], &renderBeginInfo, VK_SUBPASS_CONTENTS_INLINE);
     }
 
     b8 RendererContext::Render()
     {
-        vkCmdBindPipeline(m_CommandBuffers[0], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
-        vkCmdDraw(m_CommandBuffers[0], 3, 1, 0, 0);
+        vkCmdBindPipeline(m_CommandBuffers[m_CurrentFrame], VK_PIPELINE_BIND_POINT_GRAPHICS, m_GraphicsPipeline);
+        vkCmdDraw(m_CommandBuffers[m_CurrentFrame], 3, 1, 0, 0);
     }
 
     b8 RendererContext::RenderEnd()
     {
+        vkCmdEndRenderPass(m_CommandBuffers[m_CurrentFrame]);
 
-        vkCmdEndRenderPass(m_CommandBuffers[0]);
-
-        VkResult result = vkEndCommandBuffer(m_CommandBuffers[0]);
+        VkResult result = vkEndCommandBuffer(m_CommandBuffers[m_CurrentFrame]);
         CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to end recording of a Vulkan Command Buffer");
+
+        VkSubmitInfo submitInfo = {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+
+        VkSemaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
+        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        submitInfo.waitSemaphoreCount = 1;
+        submitInfo.pWaitSemaphores = waitSemaphores;
+        submitInfo.pWaitDstStageMask = waitStages;
+
+        VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+        submitInfo.signalSemaphoreCount = 1;
+        submitInfo.pSignalSemaphores = signalSemaphores;
+
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &m_CommandBuffers[m_CurrentFrame];
+
+        result = vkQueueSubmit(m_GraphicsQueueHandle, 1, &submitInfo, m_FrameFlightFences[m_CurrentFrame]);
+        CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to submit a Vulkan Command Buffer to the Graphics Queue");
+        CX_INFO("QUEUE SUBMITTED SUCCESSFULLY");
+
+        VkPresentInfoKHR presentInfo = {};
+        presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
+        presentInfo.waitSemaphoreCount = 1;
+        presentInfo.pWaitSemaphores = &m_RenderFinishedSemaphores[m_CurrentFrame];
+        
+        VkSwapchainKHR swapchains[] = { m_Swapchain };
+        presentInfo.swapchainCount = 1;
+        presentInfo.pSwapchains = swapchains;
+        presentInfo.pImageIndices = &m_CurrentImageIndex;
+        presentInfo.pResults = nullptr;
+
+        vkQueuePresentKHR(m_PresentQueueHandle, &presentInfo);
+
+        m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
+
     }
 
     // INITIALISATION
@@ -159,7 +202,7 @@ namespace Cortex
         return images;
     }
 
-    std::vector<VkImageView> RendererContext::CreateSwapchainImageViews()
+    std::vector<VkImageView> RendererContext::CreateSwapchainImageViews()   
     {
         std::vector<VkImageView> imageViews(m_SwapchainImages.size());
         for (size_t i = 0; i < imageViews.size(); i++)
@@ -190,6 +233,14 @@ namespace Cortex
     {
         VkRenderPass renderPass;
 
+        VkSubpassDependency dependency = {};
+        dependency.srcSubpass = VK_SUBPASS_EXTERNAL;
+        dependency.dstSubpass = 0;
+        dependency.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.srcAccessMask = 0;
+        dependency.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependency.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_COLOR_ATTACHMENT_READ_BIT;
+
         VkAttachmentDescription colorAttachment = {};
         colorAttachment.format = m_SwapchainImageFormat;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -213,6 +264,8 @@ namespace Cortex
         renderPassInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         renderPassInfo.attachmentCount = 1;
         renderPassInfo.pAttachments = &colorAttachment;
+        renderPassInfo.dependencyCount = 1;
+        renderPassInfo.pDependencies = &dependency;
         renderPassInfo.subpassCount = 1;
         renderPassInfo.pSubpasses = &subpass;
 
@@ -385,14 +438,14 @@ namespace Cortex
 
     std::vector<VkCommandBuffer> RendererContext::CreateCommandBuffers(const std::unique_ptr<RendererBackend> &backend)
     {
-        std::vector<VkCommandBuffer> buffers(m_Framebuffers.size());
+        std::vector<VkCommandBuffer> buffers(MAX_FRAMES_IN_FLIGHT);
         VkCommandPool pool = backend->GetCommandPool();
 
         VkCommandBufferAllocateInfo allocInfo = {};
         allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
         allocInfo.commandPool = pool;
         allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandBufferCount = buffers.size();
+        allocInfo.commandBufferCount = static_cast<u32>(buffers.size());
 
         VkResult result = vkAllocateCommandBuffers(m_DeviceHandle, &allocInfo, buffers.data());
         CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to allocate Vulkan Command Buffers");
