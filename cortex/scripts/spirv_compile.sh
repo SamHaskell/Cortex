@@ -1,0 +1,2 @@
+/Users/sam/VulkanSDK/1.3.243.0/macOS/bin/glslc ../assets/Shaders/basic.vert -o ../assets/Shaders/basic.vert.spv
+/Users/sam/VulkanSDK/1.3.243.0/macOS/bin/glslc ../assets/Shaders/basic.frag -o ../assets/Shaders/basic.frag.spv

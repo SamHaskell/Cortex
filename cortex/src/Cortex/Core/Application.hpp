@@ -2,6 +2,8 @@
 
 #include "Cortex/Utils/Asserts.h"
 
+#include "Cortex/Core/Window.hpp"
+
 #include "Cortex/Graphics/Renderer.hpp"
 
 namespace Cortex
@@ -19,7 +21,8 @@ namespace Cortex
     private:
         b8 m_Finished;
         b8 m_Suspended;
-        std::unique_ptr<Renderer> p_Renderer;
+        std::unique_ptr<Window> m_Window;
+        std::unique_ptr<Renderer> m_Renderer;
     };
 
     Application *CreateApplication();

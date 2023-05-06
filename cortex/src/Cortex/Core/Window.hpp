@@ -26,7 +26,10 @@ namespace Cortex
         void Update();
         void SetEventCallback(const EventCallback &cb);
 
-        void CreateVulkanSurface(const VkInstance instance, VkSurfaceKHR& surface);
+        inline u32 GetFramebufferWidth() { return static_cast<u32>(m_WindowData.FramebufferWidth); }
+        inline u32 GetFramebufferHeight() { return static_cast<u32>(m_WindowData.FramebufferHeight); }
+
+        void CreateVulkanSurface(const VkInstance instance, VkSurfaceKHR &surface);
 
     private:
         void InitWindowCallbacks();

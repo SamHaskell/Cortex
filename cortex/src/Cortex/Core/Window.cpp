@@ -1,4 +1,4 @@
-#include "Cortex/Graphics/Window.hpp"
+#include "Cortex/Core/Window.hpp"
 #include "Cortex/Utils/Logging.hpp"
 
 namespace Cortex
@@ -13,7 +13,7 @@ namespace Cortex
         m_WindowData.Height = height;
 
         glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-        glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
+        glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
         m_WindowInstance = glfwCreateWindow(m_WindowData.Width, m_WindowData.Height, m_WindowData.Title, NULL, NULL);
 
         glfwGetWindowPos(m_WindowInstance, &m_WindowData.PositionX, &m_WindowData.PositionY);
@@ -120,7 +120,8 @@ namespace Cortex
             } });
     }
 
-    void Window::CreateVulkanSurface(const VkInstance instance, VkSurfaceKHR& surface) {
+    void Window::CreateVulkanSurface(const VkInstance instance, VkSurfaceKHR &surface)
+    {
         VkResult result = glfwCreateWindowSurface(instance, m_WindowInstance, nullptr, &surface);
         CX_ASSERT_MSG(result == VK_SUCCESS, "GLFW failed to create a Vulkan surface");
     }
