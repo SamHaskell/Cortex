@@ -11,6 +11,9 @@ namespace Cortex
     struct Vertex {
         glm::vec2 pos;
         glm::vec3 color;
+
+        static VkVertexInputBindingDescription GetBindingDescription();
+        static std::array<VkVertexInputAttributeDescription, 2> GetAttributeDescriptions();
     };
 
     class RendererContext
@@ -31,6 +34,7 @@ namespace Cortex
         std::vector<VkImageView> CreateSwapchainImageViews();
         VkRenderPass CreateRenderPass();
         VkPipeline CreateGraphicsPipeline();
+        VkBuffer CreateVertexBuffer();
         std::vector<VkFramebuffer> CreateFramebuffers();
         std::vector<VkCommandBuffer> CreateCommandBuffers(const std::unique_ptr<RendererBackend> &backend);
         void CreateSynchronisationObjects();
@@ -43,11 +47,18 @@ namespace Cortex
 
     private:
         const int MAX_FRAMES_IN_FLIGHT = 2;
+
+        const std::vector<Vertex> m_TestVertices = {
+            {{ 0.0f, -0.5f}, {0.8f, 0.2f, 0.0f}},
+            {{ 0.5f,  0.5f}, {0.0f, 0.8f, 0.2f}},
+            {{-0.5f,  0.5f}, {0.2f, 0.0f, 0.8f}}
+        };
+
         const VkDevice& m_DeviceHandle;
         const VkQueue& m_GraphicsQueueHandle;
         const VkQueue& m_PresentQueueHandle;
-        VkSwapchainKHR m_Swapchain;
 
+        VkSwapchainKHR m_Swapchain;
         std::vector<VkImage> m_SwapchainImages;
         std::vector<VkImageView> m_SwapchainImageViews;
         VkFormat m_SwapchainImageFormat;
@@ -56,6 +67,8 @@ namespace Cortex
         VkRenderPass m_RenderPass;
         VkPipeline m_GraphicsPipeline;
         VkPipelineLayout m_PipelineLayout;
+
+        VkBuffer m_TestBuffer;
 
         std::vector<VkFramebuffer> m_Framebuffers;
         std::vector<VkCommandBuffer> m_CommandBuffers;

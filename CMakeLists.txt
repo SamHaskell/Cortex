@@ -10,8 +10,8 @@ project(
 
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
-# Cortex Engine dylib compiled here
-add_subdirectory(Cortex)
+# Cortex Engine static lib compiled here
+add_subdirectory(engine)
 
 # Client exe compiled here
 add_subdirectory(testbed)

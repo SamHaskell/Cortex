@@ -91,5 +91,5 @@ file(GLOB PROJECT_SHADERS assets/Shaders/*.comp
 
 add_custom_command(
     TARGET Cortex POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Cortex/assets/Shaders $<TARGET_FILE_DIR:Cortex>/assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/assets/Shaders $<TARGET_FILE_DIR:Cortex>/assets/Shaders
     DEPENDS ${PROJECT_SHADERS})

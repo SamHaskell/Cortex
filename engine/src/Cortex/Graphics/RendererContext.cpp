@@ -6,6 +6,30 @@
 
 namespace Cortex
 {
+    VkVertexInputBindingDescription Vertex::GetBindingDescription()
+    {
+        VkVertexInputBindingDescription bindingDescription = {};
+        bindingDescription.binding = 0;
+        bindingDescription.stride = sizeof(Vertex);
+        bindingDescription.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
+        return bindingDescription;
+    }
+
+    std::array<VkVertexInputAttributeDescription, 2> Vertex::GetAttributeDescriptions()
+    {
+        std::array<VkVertexInputAttributeDescription, 2> attributeDescriptions = {};
+        attributeDescriptions[0].binding = 0;
+        attributeDescriptions[0].location = 0;
+        attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[0].offset = offsetof(Vertex, pos);
+
+        attributeDescriptions[1].binding = 0;
+        attributeDescriptions[1].location = 1;
+        attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
+        attributeDescriptions[1].offset = offsetof(Vertex, color);
+        return attributeDescriptions;
+    }
+
     RendererContext::RendererContext(const std::unique_ptr<RendererBackend> &backend, u32 windowWidth, u32 windowHeight)
         : m_DeviceHandle(backend->GetDevice()),
           m_GraphicsQueueHandle(backend->GetGraphicsQueue()),
@@ -16,6 +40,7 @@ namespace Cortex
           m_RenderPass(CreateRenderPass()),
           m_GraphicsPipeline(CreateGraphicsPipeline()),
           m_Framebuffers(CreateFramebuffers()),
+          m_TestBuffer(CreateVertexBuffer()),
           m_CommandBuffers(CreateCommandBuffers(backend))
     {
         CreateSynchronisationObjects();
@@ -25,12 +50,13 @@ namespace Cortex
     {
         vkDeviceWaitIdle(m_DeviceHandle);
 
-        for (size_t i = 0; i < m_FrameFlightFences.size(); i++) {
+        for (size_t i = 0; i < m_FrameFlightFences.size(); i++)
+        {
             vkDestroyFence(m_DeviceHandle, m_FrameFlightFences[i], nullptr);
             vkDestroySemaphore(m_DeviceHandle, m_RenderFinishedSemaphores[i], nullptr);
             vkDestroySemaphore(m_DeviceHandle, m_ImageAvailableSemaphores[i], nullptr);
         }
-
+        vkDestroyBuffer(m_DeviceHandle, m_TestBuffer, nullptr);
         for (auto &framebuffer : m_Framebuffers)
         {
             vkDestroyFramebuffer(m_DeviceHandle, framebuffer, nullptr);
@@ -103,13 +129,13 @@ namespace Cortex
         VkSubmitInfo submitInfo = {};
         submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
 
-        VkSemaphore waitSemaphores[] = { m_ImageAvailableSemaphores[m_CurrentFrame] };
-        VkPipelineStageFlags waitStages[] = { VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT };
+        VkSemaphore waitSemaphores[] = {m_ImageAvailableSemaphores[m_CurrentFrame]};
+        VkPipelineStageFlags waitStages[] = {VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT};
         submitInfo.waitSemaphoreCount = 1;
         submitInfo.pWaitSemaphores = waitSemaphores;
         submitInfo.pWaitDstStageMask = waitStages;
 
-        VkSemaphore signalSemaphores[] = { m_RenderFinishedSemaphores[m_CurrentFrame] };
+        VkSemaphore signalSemaphores[] = {m_RenderFinishedSemaphores[m_CurrentFrame]};
         submitInfo.signalSemaphoreCount = 1;
         submitInfo.pSignalSemaphores = signalSemaphores;
 
@@ -124,8 +150,8 @@ namespace Cortex
         presentInfo.sType = VK_STRUCTURE_TYPE_PRESENT_INFO_KHR;
         presentInfo.waitSemaphoreCount = 1;
         presentInfo.pWaitSemaphores = &m_RenderFinishedSemaphores[m_CurrentFrame];
-        
-        VkSwapchainKHR swapchains[] = { m_Swapchain };
+
+        VkSwapchainKHR swapchains[] = {m_Swapchain};
         presentInfo.swapchainCount = 1;
         presentInfo.pSwapchains = swapchains;
         presentInfo.pImageIndices = &m_CurrentImageIndex;
@@ -134,7 +160,6 @@ namespace Cortex
         vkQueuePresentKHR(m_PresentQueueHandle, &presentInfo);
 
         m_CurrentFrame = (m_CurrentFrame + 1) % MAX_FRAMES_IN_FLIGHT;
-
     }
 
     // INITIALISATION
@@ -202,7 +227,7 @@ namespace Cortex
         return images;
     }
 
-    std::vector<VkImageView> RendererContext::CreateSwapchainImageViews()   
+    std::vector<VkImageView> RendererContext::CreateSwapchainImageViews()
     {
         std::vector<VkImageView> imageViews(m_SwapchainImages.size());
         for (size_t i = 0; i < imageViews.size(); i++)
@@ -302,12 +327,15 @@ namespace Cortex
         shaderStages[1].pNext = nullptr;
         shaderStages[1].flags = 0;
 
+        auto bindingDescription = Vertex::GetBindingDescription();
+        auto attributeDescriptions = Vertex::GetAttributeDescriptions();
+
         VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;
-        vertexInputInfo.vertexAttributeDescriptionCount = 0;
-        vertexInputInfo.pVertexAttributeDescriptions = nullptr;
-        vertexInputInfo.vertexBindingDescriptionCount = 0;
-        vertexInputInfo.pVertexBindingDescriptions = nullptr;
+        vertexInputInfo.vertexAttributeDescriptionCount = static_cast<u32>(attributeDescriptions.size());
+        vertexInputInfo.pVertexAttributeDescriptions = attributeDescriptions.data();
+        vertexInputInfo.vertexBindingDescriptionCount = 1;
+        vertexInputInfo.pVertexBindingDescriptions = &bindingDescription;
 
         VkPipelineInputAssemblyStateCreateInfo inputAssemblyInfo = {};
         inputAssemblyInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
@@ -434,6 +462,25 @@ namespace Cortex
         }
 
         return framebuffers;
+    }
+
+    VkBuffer RendererContext::CreateVertexBuffer() {
+        VkBuffer buffer;
+        VkBufferCreateInfo bufferInfo = {};
+        bufferInfo.sType = VK_STRUCTURE_TYPE_BUFFER_CREATE_INFO;
+        bufferInfo.size = sizeof(m_TestVertices[0]) * m_TestVertices.size();
+        bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
+        bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
+        VkResult result = vkCreateBuffer(m_DeviceHandle, &bufferInfo, nullptr, &buffer);
+        CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to create a Vertex Buffer!");
+
+        VkMemoryRequirements memRequirements;
+        vkGetBufferMemoryRequirements(m_DeviceHandle, buffer, &memRequirements);
+
+        
+
+        return buffer;
+        
     }
 
     std::vector<VkCommandBuffer> RendererContext::CreateCommandBuffers(const std::unique_ptr<RendererBackend> &backend)
