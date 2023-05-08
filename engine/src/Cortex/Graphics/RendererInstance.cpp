@@ -22,6 +22,13 @@ namespace Cortex
     {
     }
 
+    RendererInstance::~RendererInstance()
+    {
+        // TODO: Destroy DebugMessenger here once implemented ...
+        vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
+        vkDestroyInstance(m_Instance, nullptr);
+    }
+
     VkInstance RendererInstance::CreateInstance(const RendererInstanceConfig& config)
     {
         VkInstance instance;

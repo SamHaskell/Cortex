@@ -2,6 +2,8 @@
 #include "Cortex/Utils/Asserts.h"
 #include "vulkan/vulkan.h"
 
+#include <set>
+
 namespace Cortex
 {
     RendererDeviceConfig RendererDeviceConfig::Default()
@@ -22,12 +24,20 @@ namespace Cortex
     }
 
     RendererDevice::RendererDevice(const RendererDeviceConfig &config, const VkInstance &instance, const VkSurfaceKHR &surface)
-    : m_PhysicalDevice(ChoosePhysicalDevice(config, instance, surface))
+        : m_PhysicalDevice(ChoosePhysicalDevice(config, instance, surface)),
+          m_QueueFamilies(QueryQueueFamilies(m_PhysicalDevice, surface, config.RequireComputeQueue)),
+          m_SwapchainSupportDetails(QuerySwapchainSupportDetails(m_PhysicalDevice, surface)),
+          m_Device(CreateDeviceAndQueues(config))
     {
         LogPhysicalDeviceDetails();
     }
 
-    VkPhysicalDevice RendererDevice::ChoosePhysicalDevice(const RendererDeviceConfig &config, const VkInstance& instance, const VkSurfaceKHR &surface)
+    RendererDevice::~RendererDevice()
+    {
+        vkDestroyDevice(m_Device, nullptr);
+    }
+
+    VkPhysicalDevice RendererDevice::ChoosePhysicalDevice(const RendererDeviceConfig &config, const VkInstance &instance, const VkSurfaceKHR &surface)
     {
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
@@ -47,6 +57,53 @@ namespace Cortex
         }
         CX_ASSERT_MSG(physicalDevice != VK_NULL_HANDLE, "Failed to find a suitable Vulkan physical device!");
         return physicalDevice;
+    }
+
+    VkDevice RendererDevice::CreateDeviceAndQueues(const RendererDeviceConfig &config)
+    {
+        VkDevice device;
+
+        VkPhysicalDeviceFeatures features = {};
+
+        std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
+        std::set<u32> uniqueQueueFamilies = {m_QueueFamilies.GraphicsFamily, m_QueueFamilies.PresentFamily};
+
+        if (config.RequireComputeQueue)
+        {
+            uniqueQueueFamilies.emplace(m_QueueFamilies.ComputeFamily);
+        }
+
+        f32 queuePriority = 1.0f;
+        for (u32 family : uniqueQueueFamilies)
+        {
+            VkDeviceQueueCreateInfo queueCreateInfo = {};
+            queueCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_QUEUE_CREATE_INFO;
+            queueCreateInfo.queueCount = 1;
+            queueCreateInfo.queueFamilyIndex = family;
+            queueCreateInfo.pQueuePriorities = &queuePriority;
+            queueCreateInfos.push_back(queueCreateInfo);
+        }
+
+        VkDeviceCreateInfo createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
+        createInfo.queueCreateInfoCount = static_cast<u32>(queueCreateInfos.size());
+        createInfo.pQueueCreateInfos = queueCreateInfos.data();
+        createInfo.pEnabledFeatures = &features;
+        createInfo.enabledExtensionCount = static_cast<u32>(config.DeviceExtensions.size());
+        createInfo.ppEnabledExtensionNames = config.DeviceExtensions.data();
+
+        VkResult result = vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &device);
+        CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to create a Vulkan Device");
+
+        vkGetDeviceQueue(device, m_QueueFamilies.GraphicsFamily, 0, &m_GraphicsQueue);
+        vkGetDeviceQueue(device, m_QueueFamilies.PresentFamily, 0, &m_PresentQueue);
+
+        if (config.RequireComputeQueue)
+        {
+            vkGetDeviceQueue(device, m_QueueFamilies.ComputeFamily, 0, &m_ComputeQueue);
+        }
+
+        return device;
     }
 
     b8 RendererDevice::CheckDeviceSuitable(const VkPhysicalDevice device, const VkSurfaceKHR surface, const RendererDeviceConfig &config)

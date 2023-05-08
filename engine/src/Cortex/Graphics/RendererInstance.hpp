@@ -18,7 +18,7 @@ namespace Cortex
     {
     public:
         RendererInstance(const RendererInstanceConfig& config, const Window& window);
-        static void DestroyInstance();
+        ~RendererInstance();
 
         inline const VkInstance GetInstance() { return m_Instance; }
         inline const VkSurfaceKHR GetSurface() { return m_Surface; }

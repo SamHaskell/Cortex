@@ -34,8 +34,13 @@ namespace Cortex
     class RendererDevice
     {
     public:
-        RendererDevice(const RendererDeviceConfig& config, const VkInstance& instance, const VkSurfaceKHR& surface);
-        void DestroyDevice();
+        RendererDevice(const RendererDeviceConfig &config, const VkInstance &instance, const VkSurfaceKHR &surface);
+        ~RendererDevice();
+
+        inline const VkDevice &GetDevice() { return m_Device; }
+        inline const DeviceQueueFamilies &GetQueueFamilies() { return m_QueueFamilies; }
+        inline const DeviceSwapchainSupportDetails &GetSwapchainSupportDetails() { return m_SwapchainSupportDetails; }
+        inline const VkQueue GetGraphicsQueue() { return m_GraphicsQueue; }
 
         RendererDevice(const RendererDevice &) = delete;
         RendererDevice &operator=(const RendererDevice &) = delete;
@@ -49,10 +54,10 @@ namespace Cortex
         VkQueue m_PresentQueue;
         VkQueue m_ComputeQueue;
 
-        VkPhysicalDevice ChoosePhysicalDevice(const RendererDeviceConfig& config, const VkInstance& instance, const VkSurfaceKHR& surface);
-        VkDevice CreateDevice();
+        VkPhysicalDevice ChoosePhysicalDevice(const RendererDeviceConfig &config, const VkInstance &instance, const VkSurfaceKHR &surface);
+        VkDevice CreateDeviceAndQueues(const RendererDeviceConfig &config);
 
-        b8 CheckDeviceSuitable(const VkPhysicalDevice device, const VkSurfaceKHR surface, const RendererDeviceConfig& config);
+        b8 CheckDeviceSuitable(const VkPhysicalDevice device, const VkSurfaceKHR surface, const RendererDeviceConfig &config);
         b8 CheckDeviceExtensionSupport(const VkPhysicalDevice device, const std::vector<const char *> requiredExtensions);
         DeviceQueueFamilies QueryQueueFamilies(const VkPhysicalDevice device, const VkSurfaceKHR surface, b8 requireCompute);
         DeviceSwapchainSupportDetails QuerySwapchainSupportDetails(const VkPhysicalDevice device, const VkSurfaceKHR surface);

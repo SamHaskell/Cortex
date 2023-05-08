@@ -19,20 +19,18 @@ namespace Cortex
         static RendererContextConfig Default(u32 width, u32 height);
     };
 
-    struct FrameData
+    struct SyncObjects
     {
-        VkCommandPool CommandPool;
-        VkCommandBuffer CommandBuffer;
-        VkSemaphore ImageAvailableSemaphores;
-        VkSemaphore RenderFinishedSemaphores;
-        VkFence InFlightFences;
+        VkSemaphore ImageAvailableSemaphore;
+        VkSemaphore RenderFinishedSemaphore;
+        VkFence InFlightFence;
     };
 
     class RendererContext
     {
     public:
         RendererContext(const RendererContextConfig& config, const Window& window);
-        ~RendererContext() {};
+        ~RendererContext();
         b8 BeginFrame();
         b8 EndFrame();
 
@@ -42,10 +40,19 @@ namespace Cortex
     private:
         const u32 MAX_FRAMES_IN_FLIGHT = 2;
         u32 m_CurrentFrameIndex;
+        u32 m_CurrentSwapchainImageIndex;
 
         RendererInstance m_Instance;
         RendererDevice m_Device;
         RendererSwapchain m_Swapchain;
-        std::vector<FrameData> m_Frames;
+        VkCommandPool m_CommandPool;
+        std::vector<VkCommandBuffer> m_CommandBuffers;
+        std::vector<SyncObjects> m_SyncObjects;
+
+        VkCommandPool CreateCommandPool();
+        std::vector<VkCommandBuffer> CreateCommandBuffers(u32 count);
+        std::vector<SyncObjects> CreateSyncObjects(u32 count);
+
+        void DestroySyncObjects();
     };
 }
