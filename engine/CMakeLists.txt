@@ -29,9 +29,17 @@ set(
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Entrypoint.hpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Window.hpp
 
-    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/Renderer.hpp
-    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererBackend.hpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererContext.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererInstance.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererDevice.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererSwapchain.hpp
+    
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanInstance.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanDevice.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanSwapchain.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanContext.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanRenderer.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanPipeline.hpp
 
 )
 
@@ -43,9 +51,17 @@ set(
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Application.cpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Window.cpp
 
-    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/Renderer.cpp
-    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererBackend.cpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererContext.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererInstance.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererDevice.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererSwapchain.cpp
+
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanInstance.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanDevice.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanSwapchain.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanContext.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanRenderer.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanPipeline.cpp
 
 )
 
@@ -76,6 +92,8 @@ target_link_libraries(
     Cortex PRIVATE
     glfw ${GLFW_LIBRARIES}
     vulkan
+    glslang
+    shaderc
     # glad spdlog::spdlog
 )
 

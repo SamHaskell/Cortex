@@ -13,8 +13,7 @@ namespace Cortex
         m_Window = std::make_unique<Window>("Cortex Application", 800, 600);
         m_Window->SetEventCallback(std::bind(&Application::OnEvent, this, std::placeholders::_1));
 
-        m_Renderer = std::make_unique<Renderer>(m_Window);
-        m_Renderer->Init();
+        m_Context = std::make_unique<RendererContext>(RendererContextConfig::Default(m_Window->GetFramebufferWidth(), m_Window->GetFramebufferHeight()), *m_Window);
     }
     Application::~Application()
     {
@@ -24,7 +23,9 @@ namespace Cortex
         while (!m_Finished)
         {
             m_Window->Update();
-            m_Renderer->DrawTestFrame();
+            m_Context->BeginFrame();
+
+            m_Context->EndFrame();
         }
         return true;
     }
@@ -41,7 +42,6 @@ namespace Cortex
     }
     b8 Application::OnWindowFramebufferResize(WindowFramebufferResizeEvent &e)
     {
-        m_Renderer->OnWindowFramebufferResize(e);
         return true;
     }
 }
