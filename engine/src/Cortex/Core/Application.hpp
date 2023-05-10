@@ -3,7 +3,7 @@
 #include "Cortex/Utils/Asserts.h"
 
 #include "Cortex/Core/Window.hpp"
-#include "Cortex/Graphics/RendererContext.hpp"
+#include "Cortex/Rendering/RenderContext.hpp"
 
 namespace Cortex
 {
@@ -21,7 +21,7 @@ namespace Cortex
         b8 m_Finished;
         b8 m_Suspended;
         std::unique_ptr<Window> m_Window;
-        std::unique_ptr<RendererContext> m_Context;
+        std::unique_ptr<RenderContext> m_Context;
     };
 
     Application *CreateApplication();

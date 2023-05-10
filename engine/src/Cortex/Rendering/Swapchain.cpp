@@ -1,39 +1,50 @@
-#include "Cortex/Graphics/RendererSwapchain.hpp"
-
-#include "Cortex/Utils/Asserts.h"
-#include "Cortex/Graphics/RendererDevice.hpp"
-
-#include "vulkan/vk_enum_string_helper.h"
-#include "vulkan/vulkan.h"
+#include "Cortex/Rendering/Swapchain.hpp"
 
 namespace Cortex
 {
-    RendererSwapchainConfig RendererSwapchainConfig::Default(u32 width, u32 height)
+    SwapchainConfig SwapchainConfig::Default(u32 width, u32 height)
     {
-        RendererSwapchainConfig config;
+        SwapchainConfig config;
         config.FramebufferWidth = width;
         config.FramebufferHeight = height;
         return config;
     }
 
-    RendererSwapchain::RendererSwapchain(const RendererSwapchainConfig &config, const VkDevice &device, const VkSurfaceKHR& surface, const DeviceQueueFamilies& queueDetails, const DeviceSwapchainSupportDetails& swapchainDetails)
-    : m_DeviceHandle(device),
-      m_Swapchain(CreateSwapchain(surface, queueDetails, swapchainDetails, config)),
-      m_SwapchainImages(RetrieveSwapchainImages()),
-      m_SwapchainImageViews(CreateSwapchainImageViews())
+    Swapchain::Swapchain(const SwapchainConfig &swapchainConfig, const std::unique_ptr<RenderInstance> &instance, const std::unique_ptr<RenderDevice> &device)
+        : m_DeviceHandle(device->GetDevice()),
+          m_Swapchain(CreateSwapchain(swapchainConfig, device->GetDevice(), instance->GetSurface(), device->GetQueueFamilies(), device->GetSwapchainSupportDetails())),
+          m_SwapchainImages(RetrieveSwapchainImages(device->GetDevice())),
+          m_SwapchainImageViews(CreateSwapchainImageViews(device->GetDevice()))
     {
         LogSwapchainDetails();
+
+        VkDevice deviceHandle = device->GetDevice();
     }
 
-    RendererSwapchain::~RendererSwapchain()
+    Swapchain::~Swapchain()
     {
-        for (auto& view : m_SwapchainImageViews) {
+        for (auto view : m_SwapchainImageViews)
+        {
             vkDestroyImageView(m_DeviceHandle, view, nullptr);
         }
         vkDestroySwapchainKHR(m_DeviceHandle, m_Swapchain, nullptr);
     }
 
-    VkSwapchainKHR RendererSwapchain::CreateSwapchain(const VkSurfaceKHR &surface, const DeviceQueueFamilies& queueDetails, const DeviceSwapchainSupportDetails& swapchainDetails, const RendererSwapchainConfig &config)
+    // Submit an order to present an image from the swapchain. 
+    // Returns the VkResult so it can be checked for more than just VkSuccess.
+
+    VkResult Swapchain::PresentImage(VkQueue queue, u32 imageIndex, VkSemaphore waitSemaphore)
+    {
+        VkPresentInfoKHR presentInfo = {VK_STRUCTURE_TYPE_PRESENT_INFO_KHR};
+        presentInfo.waitSemaphoreCount = 1;
+        presentInfo.pWaitSemaphores = &waitSemaphore;
+        presentInfo.pImageIndices = &imageIndex;
+        presentInfo.pResults = nullptr;
+
+        return vkQueuePresentKHR(queue, &presentInfo);
+    }
+
+    VkSwapchainKHR Swapchain::CreateSwapchain(const SwapchainConfig &config, const VkDevice &device, const VkSurfaceKHR &surface, const DeviceQueueFamilies &queueDetails, const DeviceSwapchainSupportDetails &swapchainDetails)
     {
         VkSwapchainKHR swapchain = VK_NULL_HANDLE;
 
@@ -75,7 +86,7 @@ namespace Cortex
         createInfo.clipped = VK_TRUE;
         createInfo.oldSwapchain = VK_NULL_HANDLE;
 
-        VkResult result = vkCreateSwapchainKHR(m_DeviceHandle, &createInfo, nullptr, &swapchain);
+        VkResult result = vkCreateSwapchainKHR(device, &createInfo, nullptr, &swapchain);
         CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to create a Vulkan Swapchain");
 
         m_SwapchainExtent = extent;
@@ -85,16 +96,16 @@ namespace Cortex
         return swapchain;
     }
 
-    std::vector<VkImage> RendererSwapchain::RetrieveSwapchainImages()
+    std::vector<VkImage> Swapchain::RetrieveSwapchainImages(const VkDevice &device)
     {
         u32 imageCount;
-        vkGetSwapchainImagesKHR(m_DeviceHandle, m_Swapchain, &imageCount, nullptr);
+        vkGetSwapchainImagesKHR(device, m_Swapchain, &imageCount, nullptr);
         std::vector<VkImage> images(imageCount);
-        vkGetSwapchainImagesKHR(m_DeviceHandle, m_Swapchain, &imageCount, images.data());
+        vkGetSwapchainImagesKHR(device, m_Swapchain, &imageCount, images.data());
         return images;
     }
 
-    std::vector<VkImageView> RendererSwapchain::CreateSwapchainImageViews()
+    std::vector<VkImageView> Swapchain::CreateSwapchainImageViews(const VkDevice &device)
     {
         std::vector<VkImageView> imageViews(m_SwapchainImages.size());
         for (size_t i = 0; i < imageViews.size(); i++)
@@ -114,14 +125,14 @@ namespace Cortex
             createInfo.subresourceRange.baseArrayLayer = 0;
             createInfo.subresourceRange.layerCount = 1;
 
-            VkResult result = vkCreateImageView(m_DeviceHandle, &createInfo, nullptr, &imageViews[i]);
+            VkResult result = vkCreateImageView(device, &createInfo, nullptr, &imageViews[i]);
             CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to create a Vulkan ImageView");
         }
 
         return imageViews;
     }
 
-    VkSurfaceFormatKHR RendererSwapchain::ChooseSwapchainSurfaceFormat(const std::vector<VkSurfaceFormatKHR> surfaceFormats)
+    VkSurfaceFormatKHR Swapchain::ChooseSwapchainSurfaceFormat(const std::vector<VkSurfaceFormatKHR> surfaceFormats)
     {
         for (const auto &surfaceFormat : surfaceFormats)
         {
@@ -141,7 +152,7 @@ namespace Cortex
         return surfaceFormats[0];
     }
 
-    VkPresentModeKHR RendererSwapchain::ChooseSwapchainPresentMode(const std::vector<VkPresentModeKHR> presentModes)
+    VkPresentModeKHR Swapchain::ChooseSwapchainPresentMode(const std::vector<VkPresentModeKHR> presentModes)
     {
         for (const auto &presentMode : presentModes)
         {
@@ -153,7 +164,7 @@ namespace Cortex
         return VK_PRESENT_MODE_FIFO_KHR;
     }
 
-    VkExtent2D RendererSwapchain::ChooseSwapchainExtents(const VkSurfaceCapabilitiesKHR capabilities, u32 windowWidth, u32 windowHeight)
+    VkExtent2D Swapchain::ChooseSwapchainExtents(const VkSurfaceCapabilitiesKHR capabilities, u32 windowWidth, u32 windowHeight)
     {
         if (capabilities.currentExtent.width != std::numeric_limits<u32>::max())
         {
@@ -169,7 +180,7 @@ namespace Cortex
         }
     }
 
-    void RendererSwapchain::LogSwapchainDetails()
+    void Swapchain::LogSwapchainDetails()
     {
         u32 n = static_cast<u32>(m_SwapchainImages.size());
 

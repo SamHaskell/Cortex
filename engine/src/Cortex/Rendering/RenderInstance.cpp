@@ -1,31 +1,36 @@
-#include "Cortex/Rendering/VulkanInstance.hpp"
-
-#include "Cortex/Utils/Asserts.h"
-#include "GLFW/glfw3.h"
+#include "Cortex/Rendering/RenderInstance.hpp"
+#include "vulkan/vulkan.hpp"
 
 namespace Cortex
 {
-    VulkanInstance::VulkanInstance(const std::unique_ptr<Window> &window)
-        : m_Instance(CreateInstance()),
-          m_Surface(CreateSurface(window)),
-          m_DebugMessenger(CreateDebugMessenger())
+    RenderInstanceConfig RenderInstanceConfig::Default()
+    {
+        RenderInstanceConfig config;
+        config.InstanceExtensions = {
+            VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME,
+            VK_EXT_DEBUG_UTILS_EXTENSION_NAME};
+        config.ValidationLayers = {
+            "VK_LAYER_KHRONOS_validation"};
+        return config;
+    }
+
+    RenderInstance::RenderInstance(const RenderInstanceConfig &config, const std::unique_ptr<Window> &window)
+        : m_Instance(CreateInstance(config)),
+          m_Surface(CreateSurface(window))
     {
     }
 
-    VulkanInstance::~VulkanInstance()
+    RenderInstance::~RenderInstance()
     {
         vkDestroySurfaceKHR(m_Instance, m_Surface, nullptr);
         vkDestroyInstance(m_Instance, nullptr);
     }
 
-    VkInstance VulkanInstance::CreateInstance()
+    VkInstance RenderInstance::CreateInstance(const RenderInstanceConfig &config)
     {
         VkInstance instance;
 
-        std::vector<const char *> layers = {
-            "VK_LAYER_KHRONOS_validation"};
-
-        b8 supported = CheckValidationLayerSupport(layers);
+        b8 supported = CheckValidationLayerSupport(config.ValidationLayers);
         CX_ASSERT_MSG(supported, "Requested Validation Layers not supported by the existing Vulkan Implementation");
 
         u32 count;
@@ -35,8 +40,10 @@ namespace Cortex
         {
             extensions[i] = glfwExtensions[i];
         }
-        extensions.push_back(VK_KHR_PORTABILITY_ENUMERATION_EXTENSION_NAME);
-        extensions.push_back(VK_EXT_DEBUG_UTILS_EXTENSION_NAME);
+        for (auto &ext : config.InstanceExtensions)
+        {
+            extensions.push_back(ext);
+        }
 
         VkApplicationInfo appInfo = {};
         appInfo.sType = VK_STRUCTURE_TYPE_APPLICATION_INFO;
@@ -49,8 +56,8 @@ namespace Cortex
         VkInstanceCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_INSTANCE_CREATE_INFO;
         createInfo.flags = VK_INSTANCE_CREATE_ENUMERATE_PORTABILITY_BIT_KHR;
-        createInfo.enabledLayerCount = static_cast<u32>(layers.size());
-        createInfo.ppEnabledLayerNames = layers.data();
+        createInfo.enabledLayerCount = static_cast<u32>(config.ValidationLayers.size());
+        createInfo.ppEnabledLayerNames = config.ValidationLayers.data();
         createInfo.enabledExtensionCount = static_cast<u32>(extensions.size());
         createInfo.ppEnabledExtensionNames = extensions.data();
         createInfo.pApplicationInfo = &appInfo;
@@ -61,19 +68,14 @@ namespace Cortex
         return instance;
     }
 
-    VkSurfaceKHR VulkanInstance::CreateSurface(const std::unique_ptr<Window> &window)
+    VkSurfaceKHR RenderInstance::CreateSurface(const std::unique_ptr<Window> &window)
     {
         VkSurfaceKHR surface;
         window->CreateVulkanSurface(m_Instance, surface);
         return surface;
     }
 
-    VkDebugUtilsMessengerEXT VulkanInstance::CreateDebugMessenger()
-    {
-            //TODO: Implement debug callback etc etc
-    }
-
-    b8 VulkanInstance::CheckValidationLayerSupport(std::vector<const char *> &layers)
+    b8 RenderInstance::CheckValidationLayerSupport(const std::vector<const char *> &layers)
     {
         u32 count;
         vkEnumerateInstanceLayerProperties(&count, nullptr);

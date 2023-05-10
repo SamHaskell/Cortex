@@ -1,38 +1,55 @@
-#include "Cortex/Rendering/VulkanDevice.hpp"
+#include "Cortex/Rendering/RenderDevice.hpp"
 
 #include <set>
 
 namespace Cortex
 {
-    VulkanDevice::VulkanDevice(std::unique_ptr<VulkanInstance> &instance)
-        : m_PhysicalDevice(ChoosePhysicalDevice(instance)),
-          m_QueueDetails(QueryQueueDetails(m_PhysicalDevice, instance->GetSurface())),
+    RenderDeviceConfig RenderDeviceConfig::Default()
+    {
+        RenderDeviceConfig config;
+        config.DeviceExtensions = {
+            VK_KHR_SWAPCHAIN_EXTENSION_NAME,
+            "VK_KHR_portability_subset"};
+        config.RequireDiscreteGPU = false;
+        config.RequireComputeQueue = false;
+        return config;
+    }
+
+    b8 DeviceQueueFamilies::IsComplete(b8 computeRequired)
+    {
+        b8 result = (GraphicsFamily != UnsetIndex && PresentFamily != UnsetIndex && TransferFamily != UnsetIndex);
+        return result && (computeRequired ? ComputeFamily != UnsetIndex : true);
+    }
+
+    RenderDevice::RenderDevice(const RenderDeviceConfig &config, const std::unique_ptr<RenderInstance> &instance)
+        : m_PhysicalDevice(ChoosePhysicalDevice(config, instance->GetInstance(), instance->GetSurface())),
+          m_QueueFamilies(QueryQueueFamilies(m_PhysicalDevice, instance->GetSurface(), config.RequireComputeQueue)),
           m_SwapchainSupportDetails(QuerySwapchainSupportDetails(m_PhysicalDevice, instance->GetSurface())),
-          m_Device(CreateDeviceAndQueues()),
-          m_CommandPool(CreateCommandPool(m_QueueDetails.GraphicsIndex))
+          m_Device(CreateDeviceAndQueues(config))
     {
         LogPhysicalDeviceDetails();
     }
 
-    VulkanDevice::~VulkanDevice()
+    RenderDevice::~RenderDevice()
     {
-        vkDestroyCommandPool(m_Device, m_CommandPool, nullptr);
+        // m_DeletionQueue.Flush();
+        vkDeviceWaitIdle(m_Device);
         vkDestroyDevice(m_Device, nullptr);
     }
 
-    VkPhysicalDevice VulkanDevice::ChoosePhysicalDevice(std::unique_ptr<VulkanInstance> &instance)
+    VkPhysicalDevice RenderDevice::ChoosePhysicalDevice(const RenderDeviceConfig &config, const VkInstance &instance, const VkSurfaceKHR &surface)
     {
         VkPhysicalDevice physicalDevice = VK_NULL_HANDLE;
 
         u32 deviceCount = 0;
-        vkEnumeratePhysicalDevices(instance->GetInstance(), &deviceCount, nullptr);
+        vkEnumeratePhysicalDevices(instance, &deviceCount, nullptr);
         CX_ASSERT_MSG(deviceCount != 0, "Failed to find any devices that support Vulkan!");
         std::vector<VkPhysicalDevice> availableDevices(deviceCount);
-        vkEnumeratePhysicalDevices(instance->GetInstance(), &deviceCount, availableDevices.data());
+        vkEnumeratePhysicalDevices(instance, &deviceCount, availableDevices.data());
 
         for (const auto &device : availableDevices)
         {
-            if (CheckDeviceSuitable(device, instance->GetSurface(), m_RequiredExtensions))
+            if (CheckDeviceSuitable(config, device, surface))
             {
                 physicalDevice = device;
                 break;
@@ -42,14 +59,19 @@ namespace Cortex
         return physicalDevice;
     }
 
-    VkDevice VulkanDevice::CreateDeviceAndQueues()
+    VkDevice RenderDevice::CreateDeviceAndQueues(const RenderDeviceConfig &config)
     {
         VkDevice device;
 
         VkPhysicalDeviceFeatures features = {};
 
         std::vector<VkDeviceQueueCreateInfo> queueCreateInfos;
-        std::set<u32> uniqueQueueFamilies = {m_QueueDetails.GraphicsIndex, m_QueueDetails.PresentIndex};
+        std::set<u32> uniqueQueueFamilies = {m_QueueFamilies.GraphicsFamily, m_QueueFamilies.PresentFamily};
+
+        if (config.RequireComputeQueue)
+        {
+            uniqueQueueFamilies.emplace(m_QueueFamilies.ComputeFamily);
+        }
 
         f32 queuePriority = 1.0f;
         for (u32 family : uniqueQueueFamilies)
@@ -67,45 +89,36 @@ namespace Cortex
         createInfo.queueCreateInfoCount = static_cast<u32>(queueCreateInfos.size());
         createInfo.pQueueCreateInfos = queueCreateInfos.data();
         createInfo.pEnabledFeatures = &features;
-        createInfo.enabledExtensionCount = static_cast<u32>(m_RequiredExtensions.size());
-        createInfo.ppEnabledExtensionNames = m_RequiredExtensions.data();
+        createInfo.enabledExtensionCount = static_cast<u32>(config.DeviceExtensions.size());
+        createInfo.ppEnabledExtensionNames = config.DeviceExtensions.data();
 
         VkResult result = vkCreateDevice(m_PhysicalDevice, &createInfo, nullptr, &device);
         CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to create a Vulkan Device");
 
-        vkGetDeviceQueue(device, m_QueueDetails.GraphicsIndex, 0, &m_GraphicsQueue);
-        vkGetDeviceQueue(device, m_QueueDetails.PresentIndex, 0, &m_PresentQueue);
+        vkGetDeviceQueue(device, m_QueueFamilies.GraphicsFamily, 0, &m_GraphicsQueue);
+        vkGetDeviceQueue(device, m_QueueFamilies.PresentFamily, 0, &m_PresentQueue);
+        vkGetDeviceQueue(device, m_QueueFamilies.TransferFamily, 0, &m_TransferQueue);
+
+        if (config.RequireComputeQueue)
+        {
+            vkGetDeviceQueue(device, m_QueueFamilies.ComputeFamily, 0, &m_ComputeQueue);
+        }
 
         return device;
     }
 
-    VkCommandPool VulkanDevice::CreateCommandPool(const u32 queueIndex)
-    {
-        VkCommandPool pool = VK_NULL_HANDLE;
-
-        VkCommandPoolCreateInfo createInfo = {};
-        createInfo.sType = VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO;
-        createInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        createInfo.queueFamilyIndex = queueIndex;
-
-        VkResult result = vkCreateCommandPool(m_Device, &createInfo, nullptr, &pool);
-        CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to create a command pool!");
-
-        return pool;
-    }
-
-    b8 VulkanDevice::CheckDeviceSuitable(const VkPhysicalDevice device, const VkSurfaceKHR surface, const std::vector<const char *> requiredExtensions)
+    b8 RenderDevice::CheckDeviceSuitable(const RenderDeviceConfig &config, const VkPhysicalDevice device, const VkSurfaceKHR surface)
     {
         VkPhysicalDeviceProperties properties;
         vkGetPhysicalDeviceProperties(device, &properties);
         VkPhysicalDeviceFeatures features;
         vkGetPhysicalDeviceFeatures(device, &features);
 
-        DeviceQueueDetails queueDetails = QueryQueueDetails(device, surface);
+        DeviceQueueFamilies queueDetails = QueryQueueFamilies(device, surface, config.RequireComputeQueue);
 
         b8 isDiscrete = (properties.deviceType == VK_PHYSICAL_DEVICE_TYPE_DISCRETE_GPU);
         b8 hasFeatures = features.geometryShader;
-        b8 hasExtensions = CheckDeviceExtensionSupport(device, requiredExtensions);
+        b8 hasExtensions = CheckDeviceExtensionSupport(device, config.DeviceExtensions);
 
         b8 swapchainSupport = false;
         if (hasExtensions)
@@ -114,10 +127,16 @@ namespace Cortex
             swapchainSupport = !swapchainDetails.PresentModes.empty() && !swapchainDetails.SurfaceFormats.empty();
         }
 
-        return hasExtensions && queueDetails.IsComplete() && swapchainSupport;
+        b8 suitable = hasExtensions && queueDetails.IsComplete(config.RequireComputeQueue) && swapchainSupport;
+        if (config.RequireDiscreteGPU)
+        {
+            suitable = suitable && isDiscrete;
+        }
+
+        return suitable;
     }
 
-    b8 VulkanDevice::CheckDeviceExtensionSupport(const VkPhysicalDevice device, const std::vector<const char *> requiredExtensions)
+    b8 RenderDevice::CheckDeviceExtensionSupport(const VkPhysicalDevice device, const std::vector<const char *> requiredExtensions)
     {
         u32 count;
         vkEnumerateDeviceExtensionProperties(device, nullptr, &count, nullptr);
@@ -143,9 +162,9 @@ namespace Cortex
         return true;
     }
 
-    DeviceQueueDetails VulkanDevice::QueryQueueDetails(const VkPhysicalDevice device, const VkSurfaceKHR surface)
+    DeviceQueueFamilies RenderDevice::QueryQueueFamilies(const VkPhysicalDevice device, const VkSurfaceKHR surface, b8 requireCompute)
     {
-        DeviceQueueDetails details;
+        DeviceQueueFamilies details;
 
         u32 queueFamilyCount;
         vkGetPhysicalDeviceQueueFamilyProperties(device, &queueFamilyCount, nullptr);
@@ -159,13 +178,21 @@ namespace Cortex
             vkGetPhysicalDeviceSurfaceSupportKHR(device, i, surface, &presentSupport);
             if (presentSupport)
             {
-                details.PresentIndex = i;
+                details.PresentFamily = i;
             }
-            if (details.GraphicsIndex == UnsetIndex && properties.queueFlags & VK_QUEUE_GRAPHICS_BIT)
+            if (details.GraphicsFamily == UnsetIndex && properties.queueFlags & VK_QUEUE_GRAPHICS_BIT)
             {
-                details.GraphicsIndex = i;
+                details.GraphicsFamily = i;
             }
-            if (details.IsComplete())
+            if (details.ComputeFamily == UnsetIndex && properties.queueFlags & VK_QUEUE_COMPUTE_BIT)
+            {
+                details.ComputeFamily = i;
+            }
+            if (details.TransferFamily == UnsetIndex && properties.queueFlags & VK_QUEUE_TRANSFER_BIT)
+            {
+                details.TransferFamily = i;
+            }
+            if (details.IsComplete(requireCompute))
             {
                 return details;
             }
@@ -174,7 +201,7 @@ namespace Cortex
         return details;
     }
 
-    DeviceSwapchainSupportDetails VulkanDevice::QuerySwapchainSupportDetails(const VkPhysicalDevice device, const VkSurfaceKHR surface)
+    DeviceSwapchainSupportDetails RenderDevice::QuerySwapchainSupportDetails(const VkPhysicalDevice device, const VkSurfaceKHR surface)
     {
         DeviceSwapchainSupportDetails swapchainDetails;
 
@@ -196,7 +223,7 @@ namespace Cortex
         return swapchainDetails;
     }
 
-    void VulkanDevice::LogPhysicalDeviceDetails()
+    void RenderDevice::LogPhysicalDeviceDetails()
     {
         VkPhysicalDeviceProperties props;
         vkGetPhysicalDeviceProperties(m_PhysicalDevice, &props);
@@ -218,5 +245,6 @@ namespace Cortex
             type = "Other";
         }
         CX_INFO("(Vulkan Physical Device) NAME: %s, ID: %u, TYPE: %s", props.deviceName, props.deviceID, type);
+        CX_INFO("(Vulkan Queue Indices) GRAPHICS: %u, PRESENT: %u, COMPUTE: %u, TRANSFER: %u", m_QueueFamilies.GraphicsFamily, m_QueueFamilies.PresentFamily, m_QueueFamilies.ComputeFamily, m_QueueFamilies.TransferFamily);
     }
 }

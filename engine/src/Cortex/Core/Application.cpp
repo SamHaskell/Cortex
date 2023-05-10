@@ -1,5 +1,6 @@
 #include "Cortex/Core/Application.hpp"
 #include "Cortex/Utils/Logging.hpp"
+#include "Cortex/Rendering/RenderContext.hpp"
 
 #include <iostream>
 
@@ -13,7 +14,8 @@ namespace Cortex
         m_Window = std::make_unique<Window>("Cortex Application", 800, 600);
         m_Window->SetEventCallback(std::bind(&Application::OnEvent, this, std::placeholders::_1));
 
-        m_Context = std::make_unique<RendererContext>(RendererContextConfig::Default(m_Window->GetFramebufferWidth(), m_Window->GetFramebufferHeight()), *m_Window);
+        m_Context = std::make_unique<RenderContext>(RenderContextConfig::Default((u32) m_Window->GetFramebufferWidth(), (u32) m_Window->GetFramebufferHeight()), m_Window);
+        
     }
     Application::~Application()
     {
@@ -22,10 +24,7 @@ namespace Cortex
     {
         while (!m_Finished)
         {
-            m_Window->Update();
-            m_Context->BeginFrame();
-
-            m_Context->EndFrame();
+            m_Window->Update(); // Polls Events
         }
         return true;
     }
