@@ -29,9 +29,13 @@ set(
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Entrypoint.hpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Window.hpp
 
-    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/Renderer.hpp
-    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererBackend.hpp
-    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererContext.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/RenderContext.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/RenderInstance.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/RenderDevice.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Swapchain.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Renderer.hpp
+
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanUtils.h
 
 )
 
@@ -43,9 +47,11 @@ set(
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Application.cpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Core/Window.cpp
 
-    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/Renderer.cpp
-    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererBackend.cpp
-    ${Cortex_SOURCE_DIR}/src/Cortex/Graphics/RendererContext.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/RenderContext.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/RenderInstance.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/RenderDevice.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Swapchain.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Renderer.cpp
 
 )
 
@@ -76,6 +82,8 @@ target_link_libraries(
     Cortex PRIVATE
     glfw ${GLFW_LIBRARIES}
     vulkan
+    glslang
+    shaderc
     # glad spdlog::spdlog
 )
 
@@ -91,5 +99,5 @@ file(GLOB PROJECT_SHADERS assets/Shaders/*.comp
 
 add_custom_command(
     TARGET Cortex POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_SOURCE_DIR}/Cortex/assets/Shaders $<TARGET_FILE_DIR:Cortex>/assets
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${PROJECT_SOURCE_DIR}/assets/Shaders $<TARGET_FILE_DIR:Cortex>/assets/Shaders
     DEPENDS ${PROJECT_SHADERS})

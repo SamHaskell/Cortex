@@ -120,7 +120,7 @@ namespace Cortex
             } });
     }
 
-    void Window::CreateVulkanSurface(const VkInstance instance, VkSurfaceKHR &surface)
+    void Window::CreateVulkanSurface(const VkInstance instance, VkSurfaceKHR &surface) const
     {
         VkResult result = glfwCreateWindowSurface(instance, m_WindowInstance, nullptr, &surface);
         CX_ASSERT_MSG(result == VK_SUCCESS, "GLFW failed to create a Vulkan surface");
