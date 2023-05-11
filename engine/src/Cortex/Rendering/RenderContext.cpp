@@ -1,5 +1,7 @@
 #include "Cortex/Rendering/RenderContext.hpp"
 
+#include "Cortex/Rendering/Pipeline.hpp"
+
 namespace Cortex
 {
     RenderContextConfig RenderContextConfig::Default(u32 width, u32 height)
@@ -12,74 +14,58 @@ namespace Cortex
     }
 
     RenderContext::RenderContext(const RenderContextConfig &contextConfig, const std::unique_ptr<Window> &window)
-        : m_CurrentFrameIndex(0),
-          m_Instance(std::make_unique<RenderInstance>(contextConfig.InstanceConfig, window)),
+        : m_Instance(std::make_unique<RenderInstance>(contextConfig.InstanceConfig, window)),
           m_Device(std::make_unique<RenderDevice>(contextConfig.DeviceConfig, m_Instance)),
           m_Swapchain(std::make_unique<Swapchain>(contextConfig.SwapchainConfig, m_Instance, m_Device)),
-          m_MainCommandPool(CreateCommandPool()),
-          m_MainCommandBuffers(CreateCommandBuffers(MAX_FRAMES_IN_FLIGHT)),
-          m_MainSyncObjects(CreateSyncObjects(MAX_FRAMES_IN_FLIGHT))
+          m_Pipeline(CreatePipeline())
     {
     }
 
     RenderContext::~RenderContext()
     {
-        DestroySyncObjects();
-        vkFreeCommandBuffers(m_Device->GetDevice(), m_MainCommandPool, static_cast<u32>(m_MainCommandBuffers.size()), m_MainCommandBuffers.data());
-        vkDestroyCommandPool(m_Device->GetDevice(), m_MainCommandPool, nullptr);
+        const VkDevice &device = m_Device->GetDevice();
+        vkDeviceWaitIdle(device);
     }
 
-    VkCommandPool RenderContext::CreateCommandPool()
+    void RenderContext::BeginFrame()
     {
-        VkCommandPool pool;
-
-        VkCommandPoolCreateInfo createInfo = {VK_STRUCTURE_TYPE_COMMAND_POOL_CREATE_INFO};
-        createInfo.flags = VK_COMMAND_POOL_CREATE_RESET_COMMAND_BUFFER_BIT;
-        createInfo.queueFamilyIndex = m_Device->GetQueueFamilies().GraphicsFamily;
-
-        VkResult result = vkCreateCommandPool(m_Device->GetDevice(), &createInfo, nullptr, &pool);
-        CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to create a Vulkan Command Pool");
-
-        return pool;
+        m_Swapchain->BeginFrame();
     }
 
-    std::vector<VkCommandBuffer> RenderContext::CreateCommandBuffers(u32 count)
+    void RenderContext::EndFrame()
     {
-        std::vector<VkCommandBuffer> buffers(count);
-        VkCommandBufferAllocateInfo allocInfo = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO};
-        allocInfo.commandBufferCount = count;
-        allocInfo.commandPool = m_MainCommandPool;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-
-        VkResult result = vkAllocateCommandBuffers(m_Device->GetDevice(), &allocInfo, buffers.data());
-        CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to allocate Vulkan Command Buffers");
-
-        return buffers;
+        m_Swapchain->EndFrame(m_Device->GetGraphicsQueue());
+        m_Swapchain->PresentFrame(m_Device->GetPresentQueue());
     }
 
-    std::vector<SyncObjects> RenderContext::CreateSyncObjects(u32 count)
+    VkPipeline RenderContext::CreatePipeline()
     {
-        std::vector<SyncObjects> syncObjects(count);
-        VkSemaphoreCreateInfo semaphoreInfo = {VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO};
-        VkFenceCreateInfo fenceInfo = {VK_STRUCTURE_TYPE_FENCE_CREATE_INFO};
-        fenceInfo.flags = VK_FENCE_CREATE_SIGNALED_BIT;
-        for (u32 i = 0; i < count; i++)
-        {
-            VkResult result_a = vkCreateSemaphore(m_Device->GetDevice(), &semaphoreInfo, nullptr, &syncObjects[i].ImageAvailableSemaphore);
-            VkResult result_b = vkCreateSemaphore(m_Device->GetDevice(), &semaphoreInfo, nullptr, &syncObjects[i].RenderFinishedSemaphore);
-            VkResult result_c = vkCreateFence(m_Device->GetDevice(), &fenceInfo, nullptr, &syncObjects[i].InFlightFence);
-            CX_ASSERT_MSG(result_a == VK_SUCCESS && result_b == VK_SUCCESS && result_c == VK_SUCCESS, "Failed to create Vulkan Semaphore/Fence");
-        }
-        return syncObjects;
+        return Pipeline::CreatePipeline(m_Device->GetDevice(), "../engine/assets/Shaders/basic.vert.spv", "../engine/assets/Shaders/basic.frag.spv", PipelineConfig::Default(), m_Swapchain->GetRenderPass());
     }
 
-    void RenderContext::DestroySyncObjects()
+    void RenderContext::RecordTestCommandBuffer()
     {
-        for (auto &syncObjects : m_MainSyncObjects)
-        {
-            vkDestroyFence(m_Device->GetDevice(), syncObjects.InFlightFence, nullptr);
-            vkDestroySemaphore(m_Device->GetDevice(), syncObjects.ImageAvailableSemaphore, nullptr);
-            vkDestroySemaphore(m_Device->GetDevice(), syncObjects.RenderFinishedSemaphore, nullptr);
-        }
+        VkCommandBuffer commandBuffer = m_Swapchain->GetCurrentCommandBuffer();
+
+
+        // vkCmdBindPipeline(m_DrawCommandBuffers[m_CurrentFrameIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
+
+        // VkViewport viewport = {};
+        // viewport.x = 0.0f;
+        // viewport.y = 0.0f;
+        // viewport.width = static_cast<f32>(m_Swapchain->GetSwapchainExtent().width);
+        // viewport.height = static_cast<f32>(m_Swapchain->GetSwapchainExtent().height);
+        // viewport.maxDepth = 1.0f;
+        // viewport.minDepth = 0.0f;
+        // vkCmdSetViewport(m_DrawCommandBuffers[m_CurrentFrameIndex], 0, 1, &viewport);
+
+        // VkRect2D scissor = {};
+        // scissor.offset = {0, 0};
+        // scissor.extent = m_Swapchain->GetSwapchainExtent();
+        // vkCmdSetScissor(m_DrawCommandBuffers[m_CurrentFrameIndex], 0, 1, &scissor);
+
+        // vkCmdDraw(m_DrawCommandBuffers[m_CurrentFrameIndex], 3, 1, 0, 0);
+
+
     }
 }

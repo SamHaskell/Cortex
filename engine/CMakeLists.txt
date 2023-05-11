@@ -33,7 +33,7 @@ set(
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/RenderInstance.hpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/RenderDevice.hpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Swapchain.hpp
-    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Renderer.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Pipeline.hpp
 
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanUtils.h
 
@@ -51,7 +51,7 @@ set(
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/RenderInstance.cpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/RenderDevice.cpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Swapchain.cpp
-    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Renderer.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Pipeline.cpp
 
 )
 
@@ -82,8 +82,8 @@ target_link_libraries(
     Cortex PRIVATE
     glfw ${GLFW_LIBRARIES}
     vulkan
-    glslang
-    shaderc
+    # glslang
+    # shaderc
     # glad spdlog::spdlog
 )
 

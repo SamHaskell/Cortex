@@ -12,26 +12,6 @@ namespace Cortex
 {
     constexpr u32 UnsetIndex{std::numeric_limits<u32>::max()};
 
-    // struct DeletionQueue
-    // {
-    //     std::deque<std::function<void()>> Deletors;
-
-    //     void PushFunction(std::function<void()> &&function)
-    //     {
-    //         Deletors.push_back(function);
-    //     }
-
-    //     void Flush()
-    //     {
-    //         for (auto iter = Deletors.rbegin(); iter != Deletors.rend(); iter++)
-    //         {
-    //             CX_WARN("Deleting Something");
-    //             (*iter)();
-    //         }
-    //         Deletors.clear();
-    //     }
-    // };
-
     struct RenderDeviceConfig
     {
         std::vector<const char *> DeviceExtensions;
@@ -62,18 +42,16 @@ namespace Cortex
         RenderDevice(const RenderDeviceConfig &config, const std::unique_ptr<RenderInstance> &instance);
         ~RenderDevice();
 
-        inline const VkDevice GetDevice() { return m_Device; }
+        inline const VkDevice& GetDevice() { return m_Device; }
         inline const DeviceQueueFamilies GetQueueFamilies() { return m_QueueFamilies; }
+        inline const VkQueue GetGraphicsQueue() { return m_GraphicsQueue; }
+        inline const VkQueue GetPresentQueue() { return m_PresentQueue; }
         inline const DeviceSwapchainSupportDetails GetSwapchainSupportDetails() { return m_SwapchainSupportDetails; }
-
-        // inline void MarkForDeletion(std::function<void()> &&function) { m_DeletionQueue.Deletors.emplace_back(function); }
 
         RenderDevice(const RenderDevice &) = delete;
         RenderDevice &operator=(const RenderDevice &) = delete;
 
     private:
-        // DeletionQueue m_DeletionQueue;
-
         VkPhysicalDevice m_PhysicalDevice;
         DeviceQueueFamilies m_QueueFamilies;
         DeviceSwapchainSupportDetails m_SwapchainSupportDetails;
