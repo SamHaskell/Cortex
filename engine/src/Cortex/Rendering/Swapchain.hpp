@@ -76,6 +76,8 @@ namespace Cortex
         void CreateDrawCommandBuffers();
         void CreateDrawSyncObjects();
 
+        void DestroySwapchainObjects();
+
         VkSurfaceFormatKHR ChooseSwapchainSurfaceFormat(const std::vector<VkSurfaceFormatKHR> surfaceFormats);
         VkPresentModeKHR ChooseSwapchainPresentMode(const std::vector<VkPresentModeKHR> presentModes);
         VkExtent2D ChooseSwapchainExtents(const VkSurfaceCapabilitiesKHR capabilities, u32 windowWidth, u32 windowHeight);

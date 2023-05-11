@@ -15,6 +15,7 @@ namespace Cortex
     {
         CreateSwapchain(swapchainConfig, instance->GetSurface(), device->GetQueueFamilies(), device->GetSwapchainSupportDetails());
         CreateRenderPass();
+
         RetrieveImages();
         CreateImageViews();
         CreateFramebuffers();
@@ -28,6 +29,26 @@ namespace Cortex
 
     Swapchain::~Swapchain()
     {
+        for (auto obj : m_DrawSyncObjects)
+        {
+            vkDestroySemaphore(m_DeviceHandle, obj.ImageAvailableSemaphore, nullptr);
+            vkDestroySemaphore(m_DeviceHandle, obj.RenderFinishedSemaphore, nullptr);
+            vkDestroyFence(m_DeviceHandle, obj.InFlightFence, nullptr);
+        }
+
+        vkFreeCommandBuffers(m_DeviceHandle, m_DrawCommandPool, static_cast<u32>(m_DrawCommandBuffers.size()), m_DrawCommandBuffers.data());
+        vkDestroyCommandPool(m_DeviceHandle, m_DrawCommandPool, nullptr);
+        vkDestroyRenderPass(m_DeviceHandle, m_RenderPass, nullptr);
+
+        DestroySwapchainObjects();
+    }
+
+    void Swapchain::DestroySwapchainObjects()
+    {
+        for (auto framebuffer : m_Framebuffers)
+        {
+            vkDestroyFramebuffer(m_DeviceHandle, framebuffer, nullptr);
+        }
         for (auto view : m_ImageViews)
         {
             vkDestroyImageView(m_DeviceHandle, view, nullptr);
