@@ -14,18 +14,20 @@ namespace Cortex
         VkPipelineMultisampleStateCreateInfo Multisampler;
         VkPipelineColorBlendAttachmentState ColorBlendAttachment;
         VkPipelineDepthStencilStateCreateInfo DepthStencil;
-
         static PipelineConfig Default();
     };
 
     class Pipeline
     {
     public:
-        static VkShaderModule CreateShaderModule(const VkDevice& device, const std::vector<char>& code);
-        static std::vector<char> ReadShader(const std::string& path);
-        static VkPipeline CreatePipeline(const VkDevice &device, const std::string& vertPath, const std::string& fragPath, PipelineConfig pipelineConfig, const VkRenderPass& renderpass);
+        void CreatePipeline(const VkDevice &device, const std::string& vertPath, const std::string& fragPath, PipelineConfig pipelineConfig, const VkRenderPass& renderpass);
+
+        Pipeline(const Pipeline &) = delete;
+        Pipeline &operator=(const Pipeline &) = delete;
 
     private:
+        VkPipelineLayout m_PipelineLayout;
+        VkPipeline m_Pipeline;
         
     };
 }

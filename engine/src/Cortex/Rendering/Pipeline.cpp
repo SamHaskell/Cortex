@@ -1,6 +1,5 @@
 #include "Cortex/Rendering/Pipeline.hpp"
 
-#include <fstream>
 #include <vector>
 
 namespace Cortex
@@ -60,34 +59,8 @@ namespace Cortex
         return pipelineConfig;
     }
 
-    VkShaderModule Pipeline::CreateShaderModule(const VkDevice &device, const std::vector<char> &code)
+    void Pipeline::CreatePipeline(const VkDevice &device, const std::string &vertPath, const std::string &fragPath, PipelineConfig pipelineConfig, const VkRenderPass &renderpass)
     {
-        VkShaderModuleCreateInfo createInfo = {VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
-        createInfo.codeSize = code.size();
-        createInfo.pCode = reinterpret_cast<const u32 *>(code.data());
 
-        VkShaderModule shader;
-        VkResult result = vkCreateShaderModule(device, &createInfo, nullptr, &shader);
-        CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to create a Vulkan Shader Module");
-        return shader;
-    }
-
-    std::vector<char> Pipeline::ReadShader(const std::string &path)
-    {
-        std::ifstream file(path, std::ios::ate | std::ios::binary);
-        CX_ASSERT_MSG(file, "Could not open Shader File");
-        size_t size = file.tellg();
-        std::vector<char> buff(size);
-        file.seekg(0);
-        file.read(buff.data(), size);
-        file.close();
-        return buff;
-    }
-
-    VkPipeline Pipeline::CreatePipeline(const VkDevice &device, const std::string& vertPath, const std::string& fragPath, PipelineConfig pipelineConfig, const VkRenderPass& renderpass) {
-        auto vertCode = ReadShader(vertPath);
-        auto fragCode = ReadShader(fragPath);
-
-        CX_INFO("Vertex Shader Size: %u", vertCode.size());
     }
 }

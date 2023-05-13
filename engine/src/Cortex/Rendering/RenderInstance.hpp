@@ -23,6 +23,9 @@ namespace Cortex
         inline const VkInstance GetInstance() { return m_Instance; }
         inline const VkSurfaceKHR GetSurface() { return m_Surface; }
 
+        RenderInstance(const RenderInstance &) = delete;
+        RenderInstance &operator=(const RenderInstance &) = delete;
+
     private:
         RenderInstanceConfig m_CurrentConfig;
         VkInstance m_Instance;

@@ -16,8 +16,7 @@ namespace Cortex
     RenderContext::RenderContext(const RenderContextConfig &contextConfig, const std::unique_ptr<Window> &window)
         : m_Instance(std::make_unique<RenderInstance>(contextConfig.InstanceConfig, window)),
           m_Device(std::make_unique<RenderDevice>(contextConfig.DeviceConfig, m_Instance)),
-          m_Swapchain(std::make_unique<Swapchain>(contextConfig.SwapchainConfig, m_Instance, m_Device)),
-          m_Pipeline(CreatePipeline())
+          m_Swapchain(std::make_unique<Swapchain>(contextConfig.SwapchainConfig, m_Instance, m_Device))
     {
     }
 
@@ -36,11 +35,6 @@ namespace Cortex
     {
         m_Swapchain->EndFrame(m_Device->GetGraphicsQueue());
         m_Swapchain->PresentFrame(m_Device->GetPresentQueue());
-    }
-
-    VkPipeline RenderContext::CreatePipeline()
-    {
-        return Pipeline::CreatePipeline(m_Device->GetDevice(), "../engine/assets/Shaders/basic.vert.spv", "../engine/assets/Shaders/basic.frag.spv", PipelineConfig::Default(), m_Swapchain->GetRenderPass());
     }
 
     void RenderContext::RecordTestCommandBuffer()

@@ -6,8 +6,11 @@
 
 namespace Cortex
 {
+
+
     Application::Application()
     {
+
         m_Finished = false;
         m_Suspended = false;
 
@@ -15,6 +18,7 @@ namespace Cortex
         m_Window->SetEventCallback(std::bind(&Application::OnEvent, this, std::placeholders::_1));
 
         m_Context = std::make_unique<RenderContext>(RenderContextConfig::Default((u32) m_Window->GetFramebufferWidth(), (u32) m_Window->GetFramebufferHeight()), m_Window);
+
     }
     Application::~Application()
     {

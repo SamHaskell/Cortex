@@ -28,16 +28,12 @@ namespace Cortex
         void RecordTestCommandBuffer();
         void EndFrame();
 
+        RenderContext(const RenderContext &) = delete;
+        RenderContext &operator=(const RenderContext &) = delete;
+
     private:
         std::unique_ptr<RenderInstance> m_Instance;
         std::unique_ptr<RenderDevice> m_Device;
         std::unique_ptr<Swapchain> m_Swapchain;
-
-        VkPipelineLayout m_PipelineLayout;
-        VkPipeline m_Pipeline;
-
-        VkPipeline CreatePipeline();
-
-        void DestroySyncObjects();
     };
 }
