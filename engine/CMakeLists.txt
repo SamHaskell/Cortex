@@ -67,12 +67,8 @@ target_include_directories(
     Cortex PUBLIC
     ${Cortex_SOURCE_DIR}/src
     ${Cortex_SOURCE_DIR}/vendor/glfw/include
+    ${Cortex_SOURCE_DIR}/vendor/glm
     /Users/sam/VulkanSDK/1.3.243.0/macOS/include
-)
-
-target_include_directories(
-    Cortex PRIVATE
-    vendor/glm
 )
 
 target_link_directories(
