@@ -69,7 +69,7 @@ namespace Cortex
         vkBeginCommandBuffer(GetCurrentCommandBuffer(), &beginInfo);
 
         VkClearValue clearValue;
-        clearValue.color = {{0.2f, 0.2f, 0.5f, 1.0f}};
+        clearValue.color = {m_ClearColor};
 
         VkRenderPassBeginInfo passInfo = {VK_STRUCTURE_TYPE_RENDER_PASS_BEGIN_INFO};
         passInfo.renderPass = m_RenderPass;

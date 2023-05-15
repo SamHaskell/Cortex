@@ -3,33 +3,32 @@
 #include "Cortex/Utils/Asserts.h"
 
 #include "Cortex/Rendering/VulkanUtils.h"
+#include "Cortex/Rendering/RenderContext.hpp"
 
 namespace Cortex
 {
-    enum ShaderStage {
-        Vertex,
-        Fragment,
-        Geometry,
-        Tessellation,
-        Compute,
-    };
-
     class Shader
     {
     public:
-        Shader(const std::string& path, ShaderStage stage);
+        Shader(const std::unique_ptr<RenderContext> &context, const std::string &path, VkShaderStageFlagBits stage);
         ~Shader();
+
+        void Load();
 
         Shader(const Shader &) = delete;
         Shader &operator=(const Shader &) = delete;
 
     private:
-        ShaderStage m_ShaderStage;
+        b8 m_Outdated;
+        VkDevice m_DeviceHandle;
+        std::string m_FilePath;
+        VkShaderStageFlagBits m_ShaderStage;
         VkShaderModule m_ShaderModule;
-        VkDescriptorSetLayout m_DescriptorSetLayout;
-        VkPipelineLayout m_PipelineLayout;
+        VkPipelineShaderStageCreateInfo m_ShaderCreateInfo;
 
-        VkShaderModule CreateShaderModule(const VkDevice &device, const std::vector<char> &code);
+        void CreateShaderModule(const std::vector<char> &code);
+        void CreatePipelineLayout();
+
         std::vector<char> ReadShader(const std::string &path);
     };
 }

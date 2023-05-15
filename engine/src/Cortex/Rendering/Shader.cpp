@@ -4,22 +4,30 @@
 
 namespace Cortex
 {
-    Shader::Shader(const std::string& path, ShaderStage stage)
+    Shader::Shader(const std::unique_ptr<RenderContext> &context, const std::string &path, VkShaderStageFlagBits stage)
+        : m_DeviceHandle(context->GetDevice()->GetDevice()), m_FilePath(path), m_ShaderStage(stage)
     {
-
+        Load();
     }
 
     Shader::~Shader()
     {
-        
+        vkDestroyShaderModule(m_DeviceHandle, m_ShaderModule, nullptr);
     }
 
-    VkShaderModule Shader::CreateShaderModule(const VkDevice &device, const std::vector<char> &code)
+    void Shader::Load()
+    {
+        std::vector<char> code = ReadShader(m_FilePath);
+        CreateShaderModule(code);
+        m_Outdated = false;
+    }
+
+    void Shader::CreateShaderModule(const std::vector<char> &code)
     {
         VkShaderModuleCreateInfo createInfo = {VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO};
         createInfo.codeSize = code.size();
         createInfo.pCode = reinterpret_cast<const u32 *>(code.data());
-        VkResult result = vkCreateShaderModule(device, &createInfo, nullptr, &m_ShaderModule);
+        VkResult result = vkCreateShaderModule(m_DeviceHandle, &createInfo, nullptr, &m_ShaderModule);
         CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to create a Vulkan Shader Module");
     }
 

@@ -38,6 +38,8 @@ namespace Cortex
         inline const VkCommandBuffer GetCurrentCommandBuffer() { return m_DrawCommandBuffers[m_CurrentFrameIndex]; }
         inline const VkFramebuffer GetCurrentFramebuffer() { return m_Framebuffers[m_CurrentImageIndex]; }
 
+        inline void SetClearColor(VkClearColorValue color) { m_ClearColor = color; }
+
         void BeginFrame();
         void EndFrame(const VkQueue graphicsQueue);
         void PresentFrame(const VkQueue presentQueue);
@@ -47,6 +49,8 @@ namespace Cortex
 
         private:
         const VkDevice m_DeviceHandle;
+
+        VkClearColorValue m_ClearColor = {0.08, 0.08, 0.1, 1.0};
 
         u32 m_CurrentFrameIndex;
         u32 m_CurrentImageIndex;

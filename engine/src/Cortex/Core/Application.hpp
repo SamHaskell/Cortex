@@ -16,7 +16,7 @@ namespace Cortex
         void OnEvent(Event &e);
         b8 OnWindowClose(WindowCloseEvent &e);
         b8 OnWindowFramebufferResize(WindowFramebufferResizeEvent &e);
-
+        
     private:
         b8 m_Finished;
         b8 m_Suspended;

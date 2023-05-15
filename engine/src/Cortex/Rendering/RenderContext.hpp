@@ -28,6 +28,11 @@ namespace Cortex
         void RecordTestCommandBuffer();
         void EndFrame();
 
+        inline const std::unique_ptr<RenderDevice>& GetDevice() { return m_Device; }
+        inline const std::unique_ptr<Swapchain>& GetSwapchain() { return m_Swapchain; }
+
+        inline void SetClearColor(VkClearColorValue color) { return m_Swapchain->SetClearColor(color); }
+
         RenderContext(const RenderContext &) = delete;
         RenderContext &operator=(const RenderContext &) = delete;
 

@@ -59,8 +59,15 @@ namespace Cortex
         return pipelineConfig;
     }
 
-    void Pipeline::CreatePipeline(const VkDevice &device, const std::string &vertPath, const std::string &fragPath, PipelineConfig pipelineConfig, const VkRenderPass &renderpass)
+    Pipeline::Pipeline(const std::unique_ptr<RenderContext> &context, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
+        : m_RenderPassHandle(context->GetSwapchain()->GetRenderPass()),
+          m_VertexShader(vert),
+          m_FragmentShader(frag)
     {
+    }
 
+    Pipeline::~Pipeline()
+    {
+        
     }
 }
