@@ -1,7 +1,7 @@
 #pragma once
 
 #include "Cortex/Utils/Asserts.h"
-#include "Cortex/Rendering/VulkanUtils.h"
+#include "Cortex/Rendering/VulkanUtils.hpp"
 #include "Cortex/Rendering/RenderContext.hpp"
 #include "Cortex/Rendering/Shader.hpp"
 
@@ -11,9 +11,10 @@ namespace Cortex
 
     struct PipelineConfig
     {
-        VkPipelineDynamicStateCreateInfo DynamicState;
+        std::vector<VkDynamicState> DynamicStates;
         VkPipelineInputAssemblyStateCreateInfo InputAssembly;
-        VkPipelineViewportStateCreateInfo ViewportState;
+        VkViewport Viewport;
+        VkRect2D Scissor;
         VkPipelineRasterizationStateCreateInfo Rasterizer;
         VkPipelineMultisampleStateCreateInfo Multisampler;
         VkPipelineColorBlendAttachmentState ColorBlendAttachment;
@@ -25,18 +26,23 @@ namespace Cortex
     {
     public:
         Pipeline(const std::unique_ptr<RenderContext>& context, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag);
+        Pipeline(const std::unique_ptr<RenderContext>& context, PipelineConfig config, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag);
         ~Pipeline();
 
         Pipeline(const Pipeline &) = delete;
         Pipeline &operator=(const Pipeline &) = delete;
 
     private:
+        VkDevice m_DeviceHandle;
         VkRenderPass m_RenderPassHandle;
+        PipelineConfig m_PipelineConfig;
+        std::shared_ptr<Shader> m_VertexShader;
+        std::shared_ptr<Shader> m_FragmentShader;
         VkPipelineLayout m_PipelineLayout;
         VkPipeline m_Pipeline;
 
-        std::shared_ptr<Shader> m_VertexShader;
-        std::shared_ptr<Shader> m_FragmentShader;
+        void CreatePipelineLayout();
+        void CreatePipeline();
         
     };
 }

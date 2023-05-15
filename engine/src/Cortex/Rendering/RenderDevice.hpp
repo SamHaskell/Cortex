@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Cortex/Rendering/VulkanUtils.h"
+#include "Cortex/Rendering/VulkanUtils.hpp"
 #include "Cortex/Utils/Asserts.h"
 
 #include "Cortex/Rendering/RenderInstance.hpp"

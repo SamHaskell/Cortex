@@ -29,6 +29,18 @@ namespace Cortex
         createInfo.pCode = reinterpret_cast<const u32 *>(code.data());
         VkResult result = vkCreateShaderModule(m_DeviceHandle, &createInfo, nullptr, &m_ShaderModule);
         CX_ASSERT_MSG(result == VK_SUCCESS, "Failed to create a Vulkan Shader Module");
+
+        m_ShaderCreateInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
+        m_ShaderCreateInfo.stage = m_ShaderStage;
+        m_ShaderCreateInfo.module = m_ShaderModule;
+        m_ShaderCreateInfo.pName = "main";
+        m_ShaderCreateInfo.pSpecializationInfo = nullptr;
+        m_ShaderCreateInfo.flags = 0;
+        m_ShaderCreateInfo.pNext = nullptr;
+
+        m_VertexInputCreateInfo = {VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
+        m_VertexInputCreateInfo.vertexBindingDescriptionCount = 0;
+        m_VertexInputCreateInfo.vertexAttributeDescriptionCount = 0;
     }
 
     std::vector<char> Shader::ReadShader(const std::string &path)

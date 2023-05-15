@@ -36,7 +36,7 @@ set(
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Pipeline.hpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Shader.hpp
 
-    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanUtils.h
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanUtils.hpp
 
 )
 
@@ -97,7 +97,8 @@ target_compile_features(
 file(GLOB PROJECT_SHADERS assets/Shaders/*.comp
                           assets/Shaders/*.frag
                           assets/Shaders/*.geom
-                          assets/Shaders/*.vert)
+                          assets/Shaders/*.vert
+                          assets/Shaders/*.spv)
 
 add_custom_command(
     TARGET Cortex POST_BUILD
