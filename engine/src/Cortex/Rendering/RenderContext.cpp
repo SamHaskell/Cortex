@@ -2,6 +2,8 @@
 
 #include "Cortex/Rendering/Pipeline.hpp"
 
+#include <memory>
+
 namespace Cortex
 {
     RenderContextConfig RenderContextConfig::Default(u32 width, u32 height)
@@ -18,6 +20,9 @@ namespace Cortex
           m_Device(std::make_unique<RenderDevice>(contextConfig.DeviceConfig, m_Instance)),
           m_Swapchain(std::make_unique<Swapchain>(contextConfig.SwapchainConfig, m_Instance, m_Device))
     {
+        std::shared_ptr<Shader> testFrag = std::make_shared<Shader>(m_Device, "../engine/assets/Shaders/basic.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
+        std::shared_ptr<Shader> testVert = std::make_shared<Shader>(m_Device, "../engine/assets/Shaders/basic.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
+        m_TestPipeline = std::make_shared<Pipeline>(m_Device, m_Swapchain, testVert, testFrag);
     }
 
     RenderContext::~RenderContext()
@@ -42,23 +47,23 @@ namespace Cortex
         VkCommandBuffer commandBuffer = m_Swapchain->GetCurrentCommandBuffer();
 
 
-        // vkCmdBindPipeline(m_DrawCommandBuffers[m_CurrentFrameIndex], VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline);
+        vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_TestPipeline->GetPipeline());
 
-        // VkViewport viewport = {};
-        // viewport.x = 0.0f;
-        // viewport.y = 0.0f;
-        // viewport.width = static_cast<f32>(m_Swapchain->GetSwapchainExtent().width);
-        // viewport.height = static_cast<f32>(m_Swapchain->GetSwapchainExtent().height);
-        // viewport.maxDepth = 1.0f;
-        // viewport.minDepth = 0.0f;
-        // vkCmdSetViewport(m_DrawCommandBuffers[m_CurrentFrameIndex], 0, 1, &viewport);
+        VkViewport viewport = {};
+        viewport.x = 0.0f;
+        viewport.y = 0.0f;
+        viewport.width = static_cast<f32>(m_Swapchain->GetSwapchainExtent().width);
+        viewport.height = static_cast<f32>(m_Swapchain->GetSwapchainExtent().height);
+        viewport.maxDepth = 1.0f;
+        viewport.minDepth = 0.0f;
+        vkCmdSetViewport(commandBuffer, 0, 1, &viewport);
 
-        // VkRect2D scissor = {};
-        // scissor.offset = {0, 0};
-        // scissor.extent = m_Swapchain->GetSwapchainExtent();
-        // vkCmdSetScissor(m_DrawCommandBuffers[m_CurrentFrameIndex], 0, 1, &scissor);
+        VkRect2D scissor = {};
+        scissor.offset = {0, 0};
+        scissor.extent = m_Swapchain->GetSwapchainExtent();
+        vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-        // vkCmdDraw(m_DrawCommandBuffers[m_CurrentFrameIndex], 3, 1, 0, 0);
+        vkCmdDraw(commandBuffer, 3, 1, 0, 0);
 
 
     }

@@ -2,7 +2,8 @@
 
 #include "Cortex/Utils/Asserts.h"
 #include "Cortex/Rendering/VulkanUtils.hpp"
-#include "Cortex/Rendering/RenderContext.hpp"
+#include "Cortex/Rendering/RenderDevice.hpp"
+#include "Cortex/Rendering/Swapchain.hpp"
 #include "Cortex/Rendering/Shader.hpp"
 
 namespace Cortex
@@ -25,9 +26,11 @@ namespace Cortex
     class Pipeline
     {
     public:
-        Pipeline(const std::unique_ptr<RenderContext>& context, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag);
-        Pipeline(const std::unique_ptr<RenderContext>& context, PipelineConfig config, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag);
+        Pipeline(const std::unique_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag);
+        Pipeline(const std::unique_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, PipelineConfig config, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag);
         ~Pipeline();
+
+        inline VkPipeline GetPipeline() { return m_Pipeline; }
 
         Pipeline(const Pipeline &) = delete;
         Pipeline &operator=(const Pipeline &) = delete;

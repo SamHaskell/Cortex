@@ -8,9 +8,8 @@ namespace Cortex
     {
         PipelineConfig pipelineConfig = {};
 
-        std::vector<VkDynamicState> DynamicStates = {
-            VK_DYNAMIC_STATE_VIEWPORT,
-            VK_DYNAMIC_STATE_SCISSOR};
+        pipelineConfig.DynamicStates.push_back(VK_DYNAMIC_STATE_VIEWPORT);
+        pipelineConfig.DynamicStates.push_back(VK_DYNAMIC_STATE_SCISSOR);
 
         pipelineConfig.InputAssembly = {VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO};
         pipelineConfig.InputAssembly.primitiveRestartEnable = VK_FALSE;
@@ -56,9 +55,9 @@ namespace Cortex
         return pipelineConfig;
     }
 
-    Pipeline::Pipeline(const std::unique_ptr<RenderContext> &context, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
-        : m_DeviceHandle(context->GetDevice()->GetDevice()),
-          m_RenderPassHandle(context->GetSwapchain()->GetRenderPass()),
+    Pipeline::Pipeline(const std::unique_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
+        : m_DeviceHandle(device->GetDevice()),
+          m_RenderPassHandle(swapchain->GetRenderPass()),
           m_PipelineConfig(PipelineConfig::Default()),
           m_VertexShader(vert),
           m_FragmentShader(frag)
@@ -67,9 +66,9 @@ namespace Cortex
         CreatePipeline();
     }
 
-    Pipeline::Pipeline(const std::unique_ptr<RenderContext> &context, PipelineConfig config, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
-        : m_DeviceHandle(context->GetDevice()->GetDevice()),
-          m_RenderPassHandle(context->GetSwapchain()->GetRenderPass()),
+    Pipeline::Pipeline(const std::unique_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, PipelineConfig config, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
+        : m_DeviceHandle(device->GetDevice()),
+          m_RenderPassHandle(swapchain->GetRenderPass()),
           m_PipelineConfig(config),
           m_VertexShader(vert),
           m_FragmentShader(frag)

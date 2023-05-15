@@ -3,14 +3,14 @@
 #include "Cortex/Utils/Asserts.h"
 
 #include "Cortex/Rendering/VulkanUtils.hpp"
-#include "Cortex/Rendering/RenderContext.hpp"
+#include "Cortex/Rendering/RenderDevice.hpp"
 
 namespace Cortex
 {
     class Shader
     {
     public:
-        Shader(const std::unique_ptr<RenderContext> &context, const std::string &path, VkShaderStageFlagBits stage);
+        Shader(const std::unique_ptr<RenderDevice>& device, const std::string &path, VkShaderStageFlagBits stage);
         ~Shader();
 
         void Load();

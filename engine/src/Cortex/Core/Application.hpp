@@ -4,6 +4,8 @@
 
 #include "Cortex/Core/Window.hpp"
 #include "Cortex/Rendering/RenderContext.hpp"
+#include "Cortex/Rendering/Shader.hpp"
+#include "Cortex/Rendering/Pipeline.hpp"
 
 namespace Cortex
 {

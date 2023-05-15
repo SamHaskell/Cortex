@@ -5,6 +5,7 @@
 #include "Cortex/Rendering/RenderInstance.hpp"
 #include "Cortex/Rendering/RenderDevice.hpp"
 #include "Cortex/Rendering/Swapchain.hpp"
+#include "Cortex/Rendering/Pipeline.hpp"
 
 #include <memory>
 
@@ -40,5 +41,7 @@ namespace Cortex
         std::unique_ptr<RenderInstance> m_Instance;
         std::unique_ptr<RenderDevice> m_Device;
         std::unique_ptr<Swapchain> m_Swapchain;
+
+        std::shared_ptr<Pipeline> m_TestPipeline;
     };
 }
