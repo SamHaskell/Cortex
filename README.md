@@ -1,2 +1,8 @@
 # Cortex
-Cortex Engine - A Vulkan based 3D engine, currently being built for MacOS
+
+Cortex Engine - A Vulkan based 3D engine, currently compatible with MacOS.
+
+## Features
+
+- One (1) Triangle: Yay!
+- A Quad (Coming Soon)
