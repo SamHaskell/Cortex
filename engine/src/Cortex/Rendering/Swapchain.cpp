@@ -61,7 +61,15 @@ namespace Cortex
         vkWaitForFences(m_DeviceHandle, 1, &m_DrawSyncObjects[m_CurrentFrameIndex].InFlightFence, VK_TRUE, UINT64_MAX);
         vkResetFences(m_DeviceHandle, 1, &m_DrawSyncObjects[m_CurrentFrameIndex].InFlightFence);
 
-        vkAcquireNextImageKHR(m_DeviceHandle, m_Swapchain, UINT64_MAX, m_DrawSyncObjects[m_CurrentFrameIndex].ImageAvailableSemaphore, VK_NULL_HANDLE, &m_CurrentImageIndex);
+        VkResult result = vkAcquireNextImageKHR(m_DeviceHandle, m_Swapchain, UINT64_MAX, m_DrawSyncObjects[m_CurrentFrameIndex].ImageAvailableSemaphore, VK_NULL_HANDLE, &m_CurrentImageIndex);
+
+        // TODO: Sort out swapchain recreation!
+
+        if (result == VK_ERROR_OUT_OF_DATE_KHR) {
+            CX_WARN("Swapchain out of date!");
+        } else if (result != VK_SUCCESS && result != VK_SUBOPTIMAL_KHR) {
+            CX_ASSERT_MSG(false, "Failed to acquire a Swapchain Image!");
+        }
 
         VkCommandBufferBeginInfo beginInfo = {VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO};
         beginInfo.pNext = nullptr;
