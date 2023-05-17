@@ -35,8 +35,9 @@ set(
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Swapchain.hpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Pipeline.hpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Shader.hpp
-
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Buffer.hpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Vertex.hpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/StaticMesh.hpp
 
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/VulkanUtils.hpp
 
@@ -56,8 +57,9 @@ set(
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Swapchain.cpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Pipeline.cpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Shader.cpp
-
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Buffer.cpp
     ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/Vertex.cpp
+    ${Cortex_SOURCE_DIR}/src/Cortex/Rendering/StaticMesh.cpp
 
 )
 

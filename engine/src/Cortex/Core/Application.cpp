@@ -11,7 +11,6 @@ namespace Cortex
 
     Application::Application()
     {
-
         m_Finished = false;
         m_Suspended = false;
 

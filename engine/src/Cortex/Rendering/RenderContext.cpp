@@ -1,6 +1,8 @@
 #include "Cortex/Rendering/RenderContext.hpp"
 
 #include "Cortex/Rendering/Pipeline.hpp"
+#include "Cortex/Rendering/Buffer.hpp"
+#include "Cortex/Rendering/Vertex.hpp"
 
 #include <memory>
 
@@ -44,8 +46,15 @@ namespace Cortex
 
     void RenderContext::RecordTestCommandBuffer()
     {
-        VkCommandBuffer commandBuffer = m_Swapchain->GetCurrentCommandBuffer();
 
+        const std::vector<Vertex> vertices = {
+            {{0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+            {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}};
+
+        
+
+        VkCommandBuffer commandBuffer = m_Swapchain->GetCurrentCommandBuffer();
 
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_TestPipeline->GetPipeline());
 
