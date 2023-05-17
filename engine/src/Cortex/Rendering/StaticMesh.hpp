@@ -14,7 +14,8 @@ namespace Cortex
     class StaticMesh
     {
         public:
-
+            StaticMesh(std::shared_ptr<RenderDevice> device, std::vector<Vertex> vertices, std::vector<u16> indices);
+            ~StaticMesh() {};
         private:
             std::shared_ptr<RenderDevice> m_Device;
             std::vector<Vertex> m_Vertices;

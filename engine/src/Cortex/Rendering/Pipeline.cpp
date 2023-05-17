@@ -55,7 +55,7 @@ namespace Cortex
         return pipelineConfig;
     }
 
-    Pipeline::Pipeline(const std::shared_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
+    Pipeline::Pipeline(const std::shared_ptr<RenderDevice> &device, const std::unique_ptr<Swapchain> &swapchain, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
         : m_DeviceHandle(device->GetDevice()),
           m_RenderPassHandle(swapchain->GetRenderPass()),
           m_PipelineConfig(PipelineConfig::Default()),
@@ -66,7 +66,7 @@ namespace Cortex
         CreatePipeline();
     }
 
-    Pipeline::Pipeline(const std::shared_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, PipelineConfig config, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
+    Pipeline::Pipeline(const std::shared_ptr<RenderDevice> &device, const std::unique_ptr<Swapchain> &swapchain, PipelineConfig config, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
         : m_DeviceHandle(device->GetDevice()),
           m_RenderPassHandle(swapchain->GetRenderPass()),
           m_PipelineConfig(config),
@@ -93,8 +93,8 @@ namespace Cortex
     void Pipeline::CreatePipeline()
     {
         VkPipelineShaderStageCreateInfo shaderStages[2];
-        shaderStages[0] = m_VertexShader -> GetShaderStageCreateInfo();
-        shaderStages[1] = m_FragmentShader -> GetShaderStageCreateInfo();
+        shaderStages[0] = m_VertexShader->GetShaderStageCreateInfo();
+        shaderStages[1] = m_FragmentShader->GetShaderStageCreateInfo();
 
         VkPipelineColorBlendStateCreateInfo blendState = {VK_STRUCTURE_TYPE_PIPELINE_COLOR_BLEND_STATE_CREATE_INFO};
         blendState.attachmentCount = 1;
@@ -120,20 +120,20 @@ namespace Cortex
         vertexInput.vertexAttributeDescriptionCount = static_cast<u32>(attributeDescriptions.size());
         vertexInput.pVertexBindingDescriptions = &bindingDescription;
         vertexInput.pVertexAttributeDescriptions = attributeDescriptions.data();
-        
+
         VkGraphicsPipelineCreateInfo createInfo = {VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO};
-        
+
         createInfo.stageCount = 2;
         createInfo.pStages = shaderStages;
         createInfo.pDynamicState = &dynamicState;
         createInfo.pVertexInputState = &vertexInput;
         createInfo.pViewportState = &viewportState;
         createInfo.pInputAssemblyState = &m_PipelineConfig.InputAssembly;
-        createInfo.pColorBlendState = &blendState;        
+        createInfo.pColorBlendState = &blendState;
         createInfo.pRasterizationState = &m_PipelineConfig.Rasterizer;
         createInfo.pMultisampleState = &m_PipelineConfig.Multisampler;
         createInfo.pDepthStencilState = &m_PipelineConfig.DepthStencil;
-        
+
         createInfo.layout = m_PipelineLayout;
         createInfo.renderPass = m_RenderPassHandle;
 
