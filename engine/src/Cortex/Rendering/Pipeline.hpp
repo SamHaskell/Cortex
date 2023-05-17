@@ -27,8 +27,8 @@ namespace Cortex
     class Pipeline
     {
     public:
-        Pipeline(const std::unique_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag);
-        Pipeline(const std::unique_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, PipelineConfig config, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag);
+        Pipeline(const std::shared_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag);
+        Pipeline(const std::shared_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, PipelineConfig config, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag);
         ~Pipeline();
 
         inline VkPipeline GetPipeline() { return m_Pipeline; }

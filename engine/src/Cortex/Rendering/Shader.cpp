@@ -4,7 +4,7 @@
 
 namespace Cortex
 {
-    Shader::Shader(const std::unique_ptr<RenderDevice> &device, const std::string &path, VkShaderStageFlagBits stage)
+    Shader::Shader(const std::shared_ptr<RenderDevice> &device, const std::string &path, VkShaderStageFlagBits stage)
         : m_DeviceHandle(device->GetDevice()), m_FilePath(path), m_ShaderStage(stage)
     {
         Load();

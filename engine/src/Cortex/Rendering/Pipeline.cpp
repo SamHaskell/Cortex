@@ -55,7 +55,7 @@ namespace Cortex
         return pipelineConfig;
     }
 
-    Pipeline::Pipeline(const std::unique_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
+    Pipeline::Pipeline(const std::shared_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
         : m_DeviceHandle(device->GetDevice()),
           m_RenderPassHandle(swapchain->GetRenderPass()),
           m_PipelineConfig(PipelineConfig::Default()),
@@ -66,7 +66,7 @@ namespace Cortex
         CreatePipeline();
     }
 
-    Pipeline::Pipeline(const std::unique_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, PipelineConfig config, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
+    Pipeline::Pipeline(const std::shared_ptr<RenderDevice>& device, const std::unique_ptr<Swapchain>& swapchain, PipelineConfig config, std::shared_ptr<Shader> vert, std::shared_ptr<Shader> frag)
         : m_DeviceHandle(device->GetDevice()),
           m_RenderPassHandle(swapchain->GetRenderPass()),
           m_PipelineConfig(config),

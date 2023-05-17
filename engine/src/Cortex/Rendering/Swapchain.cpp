@@ -10,7 +10,7 @@ namespace Cortex
         return config;
     }
 
-    Swapchain::Swapchain(const SwapchainConfig &swapchainConfig, const std::unique_ptr<RenderInstance> &instance, const std::unique_ptr<RenderDevice> &device)
+    Swapchain::Swapchain(const SwapchainConfig &swapchainConfig, const std::unique_ptr<RenderInstance> &instance, const std::shared_ptr<RenderDevice> &device)
         : m_DeviceHandle(device->GetDevice())
     {
         CreateSwapchain(swapchainConfig, instance->GetSurface(), device->GetQueueFamilies(), device->GetSwapchainSupportDetails());

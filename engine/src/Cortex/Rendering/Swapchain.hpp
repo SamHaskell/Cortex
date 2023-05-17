@@ -25,7 +25,7 @@ namespace Cortex
     class Swapchain
     {
         public:
-        Swapchain(const SwapchainConfig& swapchainConfig, const std::unique_ptr<RenderInstance>& instance, const std::unique_ptr<RenderDevice>& device);
+        Swapchain(const SwapchainConfig& swapchainConfig, const std::unique_ptr<RenderInstance>& instance, const std::shared_ptr<RenderDevice>& device);
         ~Swapchain();
 
         inline const VkSwapchainKHR GetSwapchain() { return m_Swapchain; }

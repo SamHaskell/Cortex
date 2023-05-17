@@ -29,7 +29,7 @@ namespace Cortex
         void RecordTestCommandBuffer();
         void EndFrame();
 
-        inline const std::unique_ptr<RenderDevice>& GetDevice() { return m_Device; }
+        inline const std::shared_ptr<RenderDevice>& GetDevice() { return m_Device; }
         inline const std::unique_ptr<Swapchain>& GetSwapchain() { return m_Swapchain; }
 
         inline void SetClearColor(VkClearColorValue color) { return m_Swapchain->SetClearColor(color); }
@@ -39,7 +39,7 @@ namespace Cortex
 
     private:
         std::unique_ptr<RenderInstance> m_Instance;
-        std::unique_ptr<RenderDevice> m_Device;
+        std::shared_ptr<RenderDevice> m_Device;
         std::unique_ptr<Swapchain> m_Swapchain;
 
         std::shared_ptr<Pipeline> m_TestPipeline;
