@@ -15,7 +15,6 @@ namespace Cortex
 
         void Load();
         inline const VkPipelineShaderStageCreateInfo& GetShaderStageCreateInfo() { return m_ShaderCreateInfo; }
-        inline const VkPipelineVertexInputStateCreateInfo& GetVertexInputCreateInfo() { return m_VertexInputCreateInfo; }
 
         Shader(const Shader &) = delete;
         Shader &operator=(const Shader &) = delete;
@@ -27,7 +26,6 @@ namespace Cortex
         VkShaderStageFlagBits m_ShaderStage;
         VkShaderModule m_ShaderModule;
         VkPipelineShaderStageCreateInfo m_ShaderCreateInfo;
-        VkPipelineVertexInputStateCreateInfo m_VertexInputCreateInfo;
 
         void CreateShaderModule(const std::vector<char> &code);
 

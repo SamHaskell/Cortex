@@ -5,6 +5,7 @@
 #include "Cortex/Rendering/RenderDevice.hpp"
 #include "Cortex/Rendering/Swapchain.hpp"
 #include "Cortex/Rendering/Shader.hpp"
+#include "Cortex/Rendering/Vertex.hpp"
 
 namespace Cortex
 {

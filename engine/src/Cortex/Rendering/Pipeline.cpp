@@ -111,16 +111,25 @@ namespace Cortex
         VkPipelineDynamicStateCreateInfo dynamicState = {VK_STRUCTURE_TYPE_PIPELINE_DYNAMIC_STATE_CREATE_INFO};
         dynamicState.dynamicStateCount = static_cast<u32>(m_PipelineConfig.DynamicStates.size());
         dynamicState.pDynamicStates = m_PipelineConfig.DynamicStates.data();
+
+        auto bindingDescription = Vertex::GetBindingDescription();
+        auto attributeDescriptions = Vertex::GetAttributeDescriptions();
+
+        VkPipelineVertexInputStateCreateInfo vertexInput = {VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
+        vertexInput.vertexAttributeDescriptionCount = 1;
+        vertexInput.vertexAttributeDescriptionCount = static_cast<u32>(attributeDescriptions.size());
+        vertexInput.pVertexBindingDescriptions = &bindingDescription;
+        vertexInput.pVertexAttributeDescriptions = attributeDescriptions.data();
         
         VkGraphicsPipelineCreateInfo createInfo = {VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO};
         
-        createInfo.pVertexInputState = &m_VertexShader->GetVertexInputCreateInfo();
         createInfo.stageCount = 2;
         createInfo.pStages = shaderStages;
-        createInfo.pColorBlendState = &blendState;        
-        createInfo.pViewportState = &viewportState;
         createInfo.pDynamicState = &dynamicState;
+        createInfo.pVertexInputState = &vertexInput;
+        createInfo.pViewportState = &viewportState;
         createInfo.pInputAssemblyState = &m_PipelineConfig.InputAssembly;
+        createInfo.pColorBlendState = &blendState;        
         createInfo.pRasterizationState = &m_PipelineConfig.Rasterizer;
         createInfo.pMultisampleState = &m_PipelineConfig.Multisampler;
         createInfo.pDepthStencilState = &m_PipelineConfig.DepthStencil;

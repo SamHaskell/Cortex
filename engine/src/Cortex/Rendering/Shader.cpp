@@ -37,10 +37,6 @@ namespace Cortex
         m_ShaderCreateInfo.pSpecializationInfo = nullptr;
         m_ShaderCreateInfo.flags = 0;
         m_ShaderCreateInfo.pNext = nullptr;
-
-        m_VertexInputCreateInfo = {VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
-        m_VertexInputCreateInfo.vertexBindingDescriptionCount = 0;
-        m_VertexInputCreateInfo.vertexAttributeDescriptionCount = 0;
     }
 
     std::vector<char> Shader::ReadShader(const std::string &path)
