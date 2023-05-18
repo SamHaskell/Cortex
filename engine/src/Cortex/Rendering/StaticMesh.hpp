@@ -16,6 +16,10 @@ namespace Cortex
         public:
             StaticMesh(std::shared_ptr<RenderDevice> device, std::vector<Vertex> vertices, std::vector<u16> indices);
             ~StaticMesh() {};
+
+            inline const std::unique_ptr<Buffer>& GetVertexBuffer() const { return m_VertexBuffer; }
+            inline const u32 GetVertexCount() const { return m_VertexCount; }
+
         private:
             std::shared_ptr<RenderDevice> m_Device;
             std::vector<Vertex> m_Vertices;

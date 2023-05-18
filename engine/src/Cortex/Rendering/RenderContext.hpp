@@ -7,6 +7,8 @@
 #include "Cortex/Rendering/Swapchain.hpp"
 #include "Cortex/Rendering/Pipeline.hpp"
 
+#include "Cortex/Rendering/StaticMesh.hpp"
+
 #include <memory>
 
 namespace Cortex
@@ -43,5 +45,8 @@ namespace Cortex
         std::unique_ptr<Swapchain> m_Swapchain;
 
         std::shared_ptr<Pipeline> m_TestPipeline;
+        std::shared_ptr<StaticMesh> m_TestMesh;
+
+        void DrawMesh(const std::shared_ptr<StaticMesh>& mesh, VkCommandBuffer commandBuffer);
     };
 }

@@ -20,6 +20,8 @@ namespace Cortex
         Buffer(const std::shared_ptr<RenderDevice>& device, VkBufferCreateInfo createInfo);
         ~Buffer();
 
+        inline const VkBuffer GetBuffer() const { return m_Buffer; }
+
         Buffer(const Buffer &) = delete; // No copy pls
         Buffer &operator=(const Buffer &) = delete;
 

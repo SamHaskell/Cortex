@@ -6,6 +6,7 @@ namespace Cortex
         : m_DeviceHandle(device->GetDevice())
     {
         CreateBuffer(device, createInfo);
+        m_BufferMemorySize = createInfo.size;
     }
 
     Buffer::~Buffer()
@@ -21,7 +22,7 @@ namespace Cortex
         bufferInfo.usage = VK_BUFFER_USAGE_VERTEX_BUFFER_BIT;
         bufferInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         auto buffer = std::make_unique<Buffer>(device, bufferInfo);
-        buffer->FillBuffer((void*)vertices.data());
+        buffer->FillBuffer((void *)vertices.data());
         return buffer;
     }
 
@@ -52,7 +53,7 @@ namespace Cortex
         vkBindBufferMemory(m_DeviceHandle, m_Buffer, m_BufferMemory, 0);
     }
 
-    void Buffer::FillBuffer(void* pData)
+    void Buffer::FillBuffer(void *pData)
     {
         void *data;
         vkMapMemory(m_DeviceHandle, m_BufferMemory, 0, m_BufferMemorySize, 0, &data);

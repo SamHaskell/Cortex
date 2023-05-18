@@ -8,6 +8,5 @@ namespace Cortex {
         m_IndexCount = static_cast<u32>(m_Indices.size());
         m_VertexBuffer = Buffer::CreateVertexBuffer(m_Device, m_Vertices);
         m_IndexBuffer = Buffer::CreateIndexBuffer(m_Device, m_Indices);
-        
     }
 }

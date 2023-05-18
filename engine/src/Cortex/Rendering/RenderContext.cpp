@@ -27,6 +27,16 @@ namespace Cortex
         std::shared_ptr<Shader> testFrag = std::make_shared<Shader>(m_Device, "../engine/assets/Shaders/basic.frag.spv", VK_SHADER_STAGE_FRAGMENT_BIT);
         std::shared_ptr<Shader> testVert = std::make_shared<Shader>(m_Device, "../engine/assets/Shaders/basic.vert.spv", VK_SHADER_STAGE_VERTEX_BIT);
         m_TestPipeline = std::make_shared<Pipeline>(m_Device, m_Swapchain, testVert, testFrag);
+
+        std::vector<Vertex> vertices = {
+            {{0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
+            {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
+            {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}};
+
+        std::vector<uint16_t> indices = {
+            0, 1, 2, 2, 3, 0};
+
+        m_TestMesh = std::make_shared<StaticMesh>(m_Device, vertices, indices);
     }
 
     RenderContext::~RenderContext()
@@ -48,17 +58,6 @@ namespace Cortex
 
     void RenderContext::RecordTestCommandBuffer()
     {
-
-        const std::vector<Vertex> vertices = {
-            {{0.0f, -0.5f, 0.0f}, {1.0f, 0.0f, 0.0f}},
-            {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
-            {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}};
-
-        const std::vector<uint16_t> indices = {
-            0, 1, 2, 2, 3, 0};
-
-        auto mesh = StaticMesh(m_Device, vertices, indices);
-
         VkCommandBuffer commandBuffer = m_Swapchain->GetCurrentCommandBuffer();
 
         vkCmdBindPipeline(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_TestPipeline->GetPipeline());
@@ -77,8 +76,18 @@ namespace Cortex
         scissor.extent = m_Swapchain->GetSwapchainExtent();
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
-        // Draw Stuff Here
+        //////////////////////////////////////
+        // Draw Stuff Here ///////////////////
+        //////////////////////////////////////
 
-        vkCmdDraw(commandBuffer, 3, 1, 0, 0);
+        DrawMesh(m_TestMesh, commandBuffer);
+    }
+
+    void RenderContext::DrawMesh(const std::shared_ptr<StaticMesh> &mesh, VkCommandBuffer commandBuffer)
+    {
+        VkBuffer vertexBuffers[] = {mesh->GetVertexBuffer()->GetBuffer()};
+        VkDeviceSize offsets[] = {0};
+        vkCmdBindVertexBuffers(commandBuffer, 0, 1, vertexBuffers, offsets);
+        vkCmdDraw(commandBuffer, mesh->GetVertexCount(), 1, 0, 0);
     }
 }

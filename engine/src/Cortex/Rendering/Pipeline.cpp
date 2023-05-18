@@ -116,13 +116,12 @@ namespace Cortex
         auto attributeDescriptions = Vertex::GetAttributeDescriptions();
 
         VkPipelineVertexInputStateCreateInfo vertexInput = {VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO};
-        vertexInput.vertexAttributeDescriptionCount = 1;
+        vertexInput.vertexBindingDescriptionCount = 1;
         vertexInput.vertexAttributeDescriptionCount = static_cast<u32>(attributeDescriptions.size());
         vertexInput.pVertexBindingDescriptions = &bindingDescription;
         vertexInput.pVertexAttributeDescriptions = attributeDescriptions.data();
 
         VkGraphicsPipelineCreateInfo createInfo = {VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO};
-
         createInfo.stageCount = 2;
         createInfo.pStages = shaderStages;
         createInfo.pDynamicState = &dynamicState;
