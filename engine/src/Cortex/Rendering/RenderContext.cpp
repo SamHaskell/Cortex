@@ -4,6 +4,8 @@
 #include "Cortex/Rendering/Buffer.hpp"
 #include "Cortex/Rendering/Vertex.hpp"
 
+#include "Cortex/Rendering/StaticMesh.hpp"
+
 #include <memory>
 
 namespace Cortex
@@ -52,7 +54,10 @@ namespace Cortex
             {{0.5f, 0.5f, 0.0f}, {0.0f, 1.0f, 0.0f}},
             {{-0.5f, 0.5f, 0.0f}, {0.0f, 0.0f, 1.0f}}};
 
-        
+        const std::vector<uint16_t> indices = {
+            0, 1, 2, 2, 3, 0};
+
+        auto mesh = StaticMesh(m_Device, vertices, indices);
 
         VkCommandBuffer commandBuffer = m_Swapchain->GetCurrentCommandBuffer();
 
@@ -72,8 +77,8 @@ namespace Cortex
         scissor.extent = m_Swapchain->GetSwapchainExtent();
         vkCmdSetScissor(commandBuffer, 0, 1, &scissor);
 
+        // Draw Stuff Here
+
         vkCmdDraw(commandBuffer, 3, 1, 0, 0);
-
-
     }
 }

@@ -42,11 +42,14 @@ namespace Cortex
         RenderDevice(const RenderDeviceConfig &config, const std::unique_ptr<RenderInstance> &instance);
         ~RenderDevice();
 
+        inline const VkPhysicalDevice& GetPhysicalDevice() { return m_PhysicalDevice; }
         inline const VkDevice& GetDevice() { return m_Device; }
         inline const DeviceQueueFamilies GetQueueFamilies() { return m_QueueFamilies; }
         inline const VkQueue GetGraphicsQueue() { return m_GraphicsQueue; }
         inline const VkQueue GetPresentQueue() { return m_PresentQueue; }
         inline const DeviceSwapchainSupportDetails GetSwapchainSupportDetails() { return m_SwapchainSupportDetails; }
+
+        u32 FindMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties);
 
         RenderDevice(const RenderDevice &) = delete;
         RenderDevice &operator=(const RenderDevice &) = delete;

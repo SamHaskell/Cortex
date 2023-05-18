@@ -247,4 +247,16 @@ namespace Cortex
         CX_INFO("(Vulkan Physical Device) NAME: %s, ID: %u, TYPE: %s", props.deviceName, props.deviceID, type);
         CX_INFO("(Vulkan Queue Indices) GRAPHICS: %u, PRESENT: %u, COMPUTE: %u, TRANSFER: %u", m_QueueFamilies.GraphicsFamily, m_QueueFamilies.PresentFamily, m_QueueFamilies.ComputeFamily, m_QueueFamilies.TransferFamily);
     }
+
+    u32 RenderDevice::FindMemoryType(u32 typeFilter, VkMemoryPropertyFlags properties)
+    {
+        VkPhysicalDeviceMemoryProperties memoryProperties;
+        vkGetPhysicalDeviceMemoryProperties(m_PhysicalDevice, &memoryProperties);
+        for (u32 i = 0; i < memoryProperties.memoryTypeCount; i++) {
+            if ((typeFilter & (1 << i)) && (memoryProperties.memoryTypes[i].propertyFlags & properties) == properties){
+                return i;
+            }
+        }
+        CX_ASSERT_MSG(false, "Failed to find a suitable device memory type!");
+    }
 }
