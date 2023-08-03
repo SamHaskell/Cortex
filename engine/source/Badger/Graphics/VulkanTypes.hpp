@@ -22,21 +22,25 @@ namespace Badger {
     #define VULKAN_QUEUE_NOT_FOUND_INDEX std::numeric_limits<u32>::max()
 
     struct VulkanVertex {
+        glm::vec3 Position;
+        glm::vec3 Color;
         static std::vector<VkVertexInputBindingDescription> BindingDescriptions();
         static std::vector<VkVertexInputAttributeDescription> AttributeDescriptions();
     };
 
     struct VulkanPushData {
-
+        glm::mat4 Model;
     };
 
     struct VulkanVertex2D {
+        glm::vec2 Position;
+        glm::vec3 Color;
         static std::vector<VkVertexInputBindingDescription> BindingDescriptions();
         static std::vector<VkVertexInputAttributeDescription> AttributeDescriptions();
     };
 
     struct VulkanPushData2D {
-
+        glm::mat2 Transform;
     };
 
     struct VulkanQueueIndices {

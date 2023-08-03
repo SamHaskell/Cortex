@@ -6,7 +6,7 @@ namespace Badger {
 
     // MISC RESOURCE CREATION
 
-    VulkanSwapchainSpecification vulkan_create_swapchain_config(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, u32 width, u32 height);
+    VulkanSwapchainSpecification vulkan_create_swapchain_spec(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, u32 width, u32 height);
     VkRenderPass vulkan_create_renderpass(VkDevice device, const VulkanSwapchainSpecification& config);
     VkPipelineLayout vulkan_create_pipeline_layout(VkDevice device);
     VkCommandBuffer vulkan_create_command_buffer(VkDevice device, VkCommandPool commandPool);

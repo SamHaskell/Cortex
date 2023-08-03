@@ -19,19 +19,22 @@ namespace Badger {
             GraphicsContext(const GraphicsContext&) = delete;
             GraphicsContext &operator=(const GraphicsContext&) = delete;
 
-            bool BeginFrame();
+            inline std::shared_ptr<GraphicsDevice> GetDevice() { return m_GraphicsDevice; }
+            inline RenderPass GetRenderPass() { return m_RenderPass; }
+            VkCommandBuffer BeginFrame();
+            bool BeginRenderPass(VkCommandBuffer commandBuffer);
+            bool EndRenderPass(VkCommandBuffer commandBuffer);
             bool EndFrame();
             bool RecreateSwapchain(i32 width, i32 height);
+            
         private:
             u32 m_MaxFrameIndex;
             u32 m_CurrentFrameIndex;
             VulkanSessionConfig m_Config;
-            GraphicsDevice m_GraphicsDevice;
+            std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
             VulkanSwapchainSpecification m_SwapchainSpec;
             RenderPass m_RenderPass;
             std::unique_ptr<Swapchain> m_Swapchain;
-            VkPipelineLayout m_TestPipelineLayout;
-            std::shared_ptr<Pipeline> m_TestPipeline;
             VulkanDepthResources m_VulkanDepthResources;
             std::vector<VulkanFrameResources> m_FrameResources;
     };

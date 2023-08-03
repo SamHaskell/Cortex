@@ -8,7 +8,8 @@
 namespace Badger {
     class GraphicsDevice {
         public:
-            GraphicsDevice(VulkanSessionConfig config, std::unique_ptr<Window> window);
+            static std::unique_ptr<GraphicsDevice> Create(VulkanSessionConfig config, const std::unique_ptr<Window>& window);
+            GraphicsDevice(VulkanSessionConfig config, const std::unique_ptr<Window>& window);
             ~GraphicsDevice();
             GraphicsDevice(const GraphicsDevice&) = delete;
             GraphicsDevice &operator=(const GraphicsDevice&) = delete;

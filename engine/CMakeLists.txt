@@ -47,6 +47,8 @@ set(
 
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/RenderPass.hpp
 
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Entities/Entity.hpp
+
 )
 
 set(
@@ -67,6 +69,8 @@ set(
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Shader.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Pipeline.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Camera.cpp
+
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Entities/Entity.cpp
 )
 
 add_library(

@@ -4,7 +4,7 @@ namespace Badger {
 
     // MISC RESOURCE CREATION
 
-    VulkanSwapchainSpecification vulkan_create_swapchain_config(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, u32 width, u32 height) {
+    VulkanSwapchainSpecification vulkan_create_swapchain_spec(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, u32 width, u32 height) {
         VulkanSwapchainProperties properties = vulkan_query_swapchain_properties(physicalDevice, surface);
         u32 imageCount = properties.Capabilities.minImageCount + 1;
         if (properties.Capabilities.maxImageCount > 0 && imageCount > properties.Capabilities.maxImageCount)

@@ -34,6 +34,11 @@ namespace Badger
         void Update(f64 dt);
         void SetEventCallback(std::function<bool(Event &)> callback);
 
+        inline i32 GetFramebufferWidth() { return m_WindowState.FramebufferWidth; }
+        inline i32 GetFramebufferHeight() { return m_WindowState.FramebufferHeight; }
+
+        void GetVulkanSurface(VkInstance instance, VkSurfaceKHR& surface);
+
     private:
         GLFWwindow *m_WindowHandle;
         WindowState m_WindowState;

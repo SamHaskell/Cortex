@@ -14,18 +14,24 @@ namespace Badger
 
     App::~App()
     {
+        
     }
 
     bool App::Run()
     {
+        // Make some game objects here ...
+        std::vector<Entity> scene;
+
         f64 dt = 0.0; // TEMP
         while (m_Running) {
             m_Window->Update(dt);
 
-            m_GraphicsContext->BeginFrame();
+            auto cmd = m_GraphicsContext->BeginFrame();
+            m_GraphicsContext->BeginRenderPass(cmd);
 
-                // Render stuff here...
+            m_Renderer->DrawEntities(scene);
 
+            m_GraphicsContext->EndRenderPass(cmd);
             m_GraphicsContext->EndFrame();
         }
         return true;

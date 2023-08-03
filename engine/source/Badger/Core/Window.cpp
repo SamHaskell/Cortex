@@ -1,9 +1,7 @@
 #include "Badger/Core/Window.hpp"
 
-namespace Badger
-{
-    Window::Window()
-    {
+namespace Badger {
+    Window::Window() {
         m_WindowState.Width = 1280;
         m_WindowState.Height = 720;
         m_WindowState.Title = "Application";
@@ -83,20 +81,21 @@ namespace Badger
             state->Callback(e); });
     }
 
-    Window::~Window()
-    {
+    Window::~Window() {
         glfwDestroyWindow(m_WindowHandle);
         glfwTerminate();
     }
 
-    void Window::Update(f64 dt)
-    {
+    void Window::Update(f64 dt) {
         glfwSwapBuffers(m_WindowHandle);
         glfwPollEvents();
     }
 
-    void Window::SetEventCallback(std::function<bool(Event &)> callback)
-    {
+    void Window::SetEventCallback(std::function<bool(Event &)> callback) {
         m_WindowState.Callback = callback;
+    }
+
+    void Window::GetVulkanSurface(VkInstance instance, VkSurfaceKHR& surface) {
+        glfwCreateWindowSurface(instance, m_WindowHandle, nullptr, &surface);
     }
 }

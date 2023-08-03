@@ -2,12 +2,14 @@
 
 #include "Badger/Graphics/VulkanHelpers.hpp"
 #include "Badger/Graphics/VulkanTypes.hpp"
+#include "Badger/Graphics/RenderPass.hpp"
+#include "Badger/Graphics/GraphicsDevice.hpp"
 
 namespace Badger {
     class Swapchain {
         public:
-            static std::unique_ptr<Swapchain> Create(const VkPhysicalDevice& physicalDevice, VkDevice device, const VkSurfaceKHR& surface, VulkanSwapchainSpecification spec, VkRenderPass renderPass);
-            Swapchain(const VkPhysicalDevice& physicalDevice, VkDevice device, const VkSurfaceKHR& surface, VulkanSwapchainSpecification spec, VkRenderPass renderPass);
+            static std::unique_ptr<Swapchain> Create(std::shared_ptr<GraphicsDevice> device, VulkanSwapchainSpecification spec, RenderPass renderPass);
+            Swapchain(std::shared_ptr<GraphicsDevice> device, VulkanSwapchainSpecification spec, RenderPass renderPass);
             ~Swapchain();
             Swapchain(const Swapchain&) = delete;
             Swapchain &operator=(const Swapchain&) = delete;
@@ -16,7 +18,7 @@ namespace Badger {
             inline VkFramebuffer GetCurrentFramebuffer() { return m_SwapchainFramebuffers[m_CurrentImageIndex]; }
         private:
             u32 m_CurrentImageIndex;
-            VkDevice m_DeviceHandle;
+            std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
             VkSwapchainKHR m_SwapchainHandle;
             VulkanSwapchainSpecification m_Spec;
             std::vector<VkImage> m_SwapchainImages;
