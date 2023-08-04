@@ -29,7 +29,7 @@ namespace Badger {
     };
 
     struct VulkanPushData {
-        glm::mat4 Model;
+        glm::mat4 Transform;
     };
 
     struct VulkanVertex2D {

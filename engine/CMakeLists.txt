@@ -34,20 +34,25 @@ set(
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Core/App.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Core/Events.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Core/Window.hpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Core/Scene.hpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Core/Camera.hpp
 
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanHelpers.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanTypes.hpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanBuffers.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/GraphicsContext.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/GraphicsDevice.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Swapchain.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Renderer.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Shader.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Pipeline.hpp
-    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Camera.hpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Model.hpp
 
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/RenderPass.hpp
 
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Entities/Entity.hpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Entities/Transform.hpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Entities/MeshInstance.hpp
 
 )
 
@@ -59,18 +64,23 @@ set(
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Core/App.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Core/Events.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Core/Window.cpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Core/Scene.cpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Core/Camera.cpp
 
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanHelpers.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanTypes.cpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanBuffers.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/GraphicsContext.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/GraphicsDevice.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Swapchain.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Renderer.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Shader.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Pipeline.cpp
-    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Camera.cpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Model.cpp
 
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Entities/Entity.cpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Entities/Transform.cpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Entities/MeshInstance.cpp
 )
 
 add_library(

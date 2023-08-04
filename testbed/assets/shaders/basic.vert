@@ -6,10 +6,10 @@ layout(location = 1) in vec3 v_Color;
 layout(location = 0) out vec3 f_Color;
 
 layout(push_constant) uniform Push {
-    vec2 Offset;
+    mat4 ModelToWorld;
 } push;
 
 void main() {
-    gl_Position = vec4(v_Position.xy + push.Offset, v_Position.z, 1.0);
+    gl_Position = push.ModelToWorld * vec4(v_Position, 1.0);
     f_Color = v_Color;
 }

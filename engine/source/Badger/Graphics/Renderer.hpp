@@ -6,7 +6,7 @@
 #include "Badger/Graphics/GraphicsContext.hpp"
 #include "Badger/Graphics/Pipeline.hpp"
 
-#include "Badger/Entities/Entity.hpp"
+#include "Badger/Core/Scene.hpp"
 
 namespace Badger {
     class Renderer {
@@ -16,12 +16,10 @@ namespace Badger {
             ~Renderer();
             Renderer(const Renderer&) = delete;
             Renderer &operator=(const Renderer&) = delete;
-
-            void DrawEntities(std::vector<Entity> entities);
+            void DrawScene(VkCommandBuffer commandBuffer, const Scene& scene);
         private:
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
             VkPipelineLayout m_PipelineLayout;
             std::shared_ptr<Pipeline> m_Pipeline;
-
     };
 }

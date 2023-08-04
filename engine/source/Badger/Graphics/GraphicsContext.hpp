@@ -9,6 +9,7 @@
 #include "Badger/Graphics/RenderPass.hpp"
 #include "Badger/Graphics/Swapchain.hpp"
 #include "Badger/Graphics/Pipeline.hpp"
+#include "Badger/Graphics/Model.hpp"
 
 namespace Badger {
     class GraphicsContext {
@@ -21,11 +22,16 @@ namespace Badger {
 
             inline std::shared_ptr<GraphicsDevice> GetDevice() { return m_GraphicsDevice; }
             inline RenderPass GetRenderPass() { return m_RenderPass; }
+
             VkCommandBuffer BeginFrame();
             bool BeginRenderPass(VkCommandBuffer commandBuffer);
             bool EndRenderPass(VkCommandBuffer commandBuffer);
             bool EndFrame();
             bool RecreateSwapchain(i32 width, i32 height);
+
+            inline std::shared_ptr<Model> LoadModel(const std::vector<VulkanVertex>& vertices) {
+                return std::make_shared<Model>(m_GraphicsDevice, vertices);
+            }
             
         private:
             u32 m_MaxFrameIndex;

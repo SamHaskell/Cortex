@@ -16,17 +16,20 @@ namespace Badger {
     }
 
     Renderer::~Renderer() {
+        vkDeviceWaitIdle(m_GraphicsDevice->Device);
         vkDestroyPipelineLayout(m_GraphicsDevice->Device, m_PipelineLayout, nullptr);
     }
 
-    void Renderer::DrawEntities(std::vector<Entity> entities) {
-        if (entities.size() == 0) {
-            LOG_WARN("Submitted request to draw no entities to Renderer.");
-            return;
-        }
+    void Renderer::DrawScene(VkCommandBuffer commandBuffer, const Scene& scene) {
 
-        for (Entity e : entities) {
-            LOG_DEBUG("Drawing Entity. ID: %u.", e.Identifier);
+        m_Pipeline->Bind(commandBuffer);
+        for (auto& e : scene.Entities) {
+            LOG_INFO("Rendering Entity %u", e.Identifier);
+            VulkanPushData push;
+            push.Transform = scene.MainCamera.ProjectionMatrix * scene.MainCamera.ViewMatrix * e.Transform.ModelToWorld;
+            vkCmdPushConstants(commandBuffer, m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(VulkanPushData), &push);
+            e.Mesh.Model->Bind(commandBuffer);
+            e.Mesh.Model->Draw(commandBuffer);
         }
     }
 }

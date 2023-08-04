@@ -26,7 +26,7 @@ namespace Badger {
             ~Pipeline();
             Pipeline(const Pipeline&) = delete;
             Pipeline &operator=(const Pipeline&) = delete;
-            void Bind(VkCommandBuffer commandBuffer, VkExtent2D extent);
+            void Bind(VkCommandBuffer commandBuffer);
         private:
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
             VkShaderModule m_VertexShaderModule;

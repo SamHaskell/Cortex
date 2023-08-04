@@ -6,6 +6,13 @@
 
 #include "Badger/Graphics/GraphicsContext.hpp"
 #include "Badger/Graphics/Renderer.hpp"
+#include "Badger/Graphics/Model.hpp"
+
+#include "Badger/Core/Scene.hpp"
+#include "Badger/Core/Camera.hpp"
+#include "Badger/Entities/Entity.hpp"
+#include "Badger/Entities/Transform.hpp"
+#include "Badger/Entities/MeshInstance.hpp"
 
 namespace Badger
 {
