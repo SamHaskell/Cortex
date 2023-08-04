@@ -1,5 +1,9 @@
 #include "Badger/Core/App.hpp"
 
+#include <iostream>
+#include <cstdlib>
+#include <unistd.h>
+
 namespace Badger
 {
     App::App()
@@ -73,22 +77,32 @@ namespace Badger
 
         std::shared_ptr<Model> cubeModel = m_GraphicsContext->LoadModel(cubeVertices);
 
-        glm::mat4 t = glm::translate(glm::mat4(1.0f), {1.0f, -1.0f, 5.0f});
-
         Entity cube = Entity::Create();
         cube.Mesh = {cubeModel};
-        cube.Transform = {t};
+        cube.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {1.0f, 0.5f, -5.0f});
 
         Scene scene;
-        scene.Entities.push_back(cube);
-        // scene.MainCamera.SetView({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, 1.0f}, {0.0f, 1.0f, 0.0f});
+        for (i32 i = -20; i < 21; i++) {
+            for (i32 j = -10; j < 11; j++) {
+                cube.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {2.0f * (f32)i, 2.0f * (f32)j, -40.0f});
+                scene.Entities.push_back(cube);
+            }
+        }
+
+        scene.MainCamera.SetView({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f, 0.0f});
 
         f64 dt = 0.0; // TEMP
+        auto now = std::chrono::high_resolution_clock::now();
         while (m_Running) {    
-            scene.MainCamera.SetPerspectiveProjection(glm::radians(60.0f), 1.8f, 0.01f, 1000.0f);
-            scene.Entities[0].Transform.ModelToWorld = glm::rotate(scene.Entities[0].Transform.ModelToWorld, 0.001f, {0.2f, 0.7f, -1.0f});
-
             m_Window->Update(dt);
+
+            LOG_DEBUG("Frame-Time: %lf", dt);
+
+            scene.MainCamera.SetPerspectiveProjection(glm::radians(70.0f), 1.8f, 0.01f, 1000.0f);
+
+            for (auto& e : scene.Entities) {
+                e.Transform.ModelToWorld = glm::rotate(e.Transform.ModelToWorld, 1.0f * (f32)dt, {0.2f, 0.7f, -1.0f});
+            }
 
             auto cmd = m_GraphicsContext->BeginFrame();
             m_GraphicsContext->BeginRenderPass(cmd);
@@ -97,6 +111,10 @@ namespace Badger
 
             m_GraphicsContext->EndRenderPass(cmd);
             m_GraphicsContext->EndFrame();
+
+            auto next = std::chrono::high_resolution_clock::now();
+            dt = std::chrono::duration<f64, std::chrono::seconds::period>(next - now).count();
+            now = next;
         }
 
         vkDeviceWaitIdle(m_GraphicsContext->GetDevice()->Device);

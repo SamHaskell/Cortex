@@ -24,7 +24,6 @@ namespace Badger {
 
         m_Pipeline->Bind(commandBuffer);
         for (auto& e : scene.Entities) {
-            LOG_INFO("Rendering Entity %u", e.Identifier);
             VulkanPushData push;
             push.Transform = scene.MainCamera.ProjectionMatrix * scene.MainCamera.ViewMatrix * e.Transform.ModelToWorld;
             vkCmdPushConstants(commandBuffer, m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(VulkanPushData), &push);

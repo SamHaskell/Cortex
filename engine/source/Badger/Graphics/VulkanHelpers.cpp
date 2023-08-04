@@ -269,6 +269,7 @@ namespace Badger {
     VkPresentModeKHR vulkan_choose_present_mode(const std::vector<VkPresentModeKHR>& availableModes) {
         for (const auto& mode : availableModes) {
             if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
+                LOG_DEBUG("%s", string_VkPresentModeKHR(mode));
                 return mode;
             }
         }
