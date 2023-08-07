@@ -21,6 +21,8 @@ namespace Badger {
 
     #define VULKAN_QUEUE_NOT_FOUND_INDEX std::numeric_limits<u32>::max()
 
+    using VulkanIndex = u32;
+
     struct VulkanVertex {
         glm::vec3 Position;
         glm::vec3 Color;

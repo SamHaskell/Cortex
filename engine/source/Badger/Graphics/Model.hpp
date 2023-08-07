@@ -9,7 +9,7 @@
 namespace Badger {
     class Model {
         public:
-            Model(std::shared_ptr<GraphicsDevice> device, const std::vector<VulkanVertex>& vertices);
+            Model(std::shared_ptr<GraphicsDevice> device, const std::vector<VulkanVertex>& vertices, const std::vector<VulkanIndex>& indices);
             ~Model();
             Model(const Model&) = delete;
             Model &operator=(const Model&) = delete;
@@ -18,5 +18,6 @@ namespace Badger {
         private:
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
             VulkanVertexBuffer m_VertexBuffer;
+            VulkanIndexBuffer m_IndexBuffer;
     };
 }

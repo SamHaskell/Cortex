@@ -2,29 +2,143 @@
 
 namespace Badger {
 
-    VulkanVertexBuffer vulkan_create_vertex_buffer(VkPhysicalDevice physicalDevice, VkDevice device, const std::vector<VulkanVertex>& vertices) {
+    void vulkan_copy_buffer(const std::shared_ptr<GraphicsDevice> device, VkBuffer src, VkBuffer dst, VkDeviceSize size) {
+        VkCommandBufferAllocateInfo allocInfo{};
+        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
+        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
+        allocInfo.commandPool = device->TransferCommandPool;
+        allocInfo.commandBufferCount = 1;
+
+        VkCommandBuffer commandBuffer;
+        vkAllocateCommandBuffers(device->Device, &allocInfo, &commandBuffer);
+
+        VkCommandBufferBeginInfo beginInfo = {};
+        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
+        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
+
+        vkBeginCommandBuffer(commandBuffer, &beginInfo);
+
+        VkBufferCopy copyRegion = {};
+        copyRegion.srcOffset = 0;
+        copyRegion.dstOffset = 0;
+        copyRegion.size = size;
+
+        vkCmdCopyBuffer(commandBuffer, src, dst, 1, &copyRegion);
+
+        vkEndCommandBuffer(commandBuffer);
+
+        VkSubmitInfo submitInfo = {};
+        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+        submitInfo.commandBufferCount = 1;
+        submitInfo.pCommandBuffers = &commandBuffer;
+
+        vkQueueSubmit(device->Queues.Transfer, 1, &submitInfo, VK_NULL_HANDLE);
+        vkQueueWaitIdle(device->Queues.Transfer);
+
+        vkFreeCommandBuffers(device->Device, device->TransferCommandPool, 1, &commandBuffer);
+    }
+
+    VulkanVertexBuffer vulkan_create_vertex_buffer(const std::shared_ptr<GraphicsDevice> device, const std::vector<VulkanVertex>& vertices) {
         VulkanVertexBuffer vertexBuffer = {};
         vertexBuffer.VertexCount = static_cast<u32>(vertices.size());
         ASSERT(vertexBuffer.VertexCount > 2, "Vertex Count must be at least 3!");
         VkDeviceSize bufferSize = sizeof(vertices[0]) * vertexBuffer.VertexCount;
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingMemory;
+
         vulkan_create_buffer(
-            physicalDevice,
-            device,
+            device->PhysicalDevice,
+            device->Device,
             bufferSize,
-            VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
             VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            stagingBuffer,
+            stagingMemory
+        );
+
+        void* data;
+        vkMapMemory(device->Device, stagingMemory, 0, bufferSize, 0, &data);
+        memcpy(data, vertices.data(), static_cast<u32>(bufferSize));
+        vkUnmapMemory(device->Device, stagingMemory);
+
+        vulkan_create_buffer(
+            device->PhysicalDevice,
+            device->Device,
+            bufferSize,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_VERTEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
             vertexBuffer.VertexBuffer,
             vertexBuffer.VertexBufferMemory
         );
-        void* data;
-        vkMapMemory(device, vertexBuffer.VertexBufferMemory, 0, bufferSize, 0, &data);
-        memcpy(data, vertices.data(), static_cast<u32>(bufferSize));
-        vkUnmapMemory(device, vertexBuffer.VertexBufferMemory);
+
+        vulkan_copy_buffer(
+            device,
+            stagingBuffer,
+            vertexBuffer.VertexBuffer,
+            bufferSize
+        );
+
+        vkDestroyBuffer(device->Device, stagingBuffer, nullptr);
+        vkFreeMemory(device->Device, stagingMemory, nullptr);
+        
         return vertexBuffer;
     }
 
-    void vulkan_destroy_vertex_buffer(VkDevice device, const VulkanVertexBuffer& vertexBuffer) {
-        vkDestroyBuffer(device, vertexBuffer.VertexBuffer, nullptr);
-        vkFreeMemory(device, vertexBuffer.VertexBufferMemory, nullptr);
+    void vulkan_destroy_vertex_buffer(const std::shared_ptr<GraphicsDevice> device, const VulkanVertexBuffer& vertexBuffer) {
+        vkDestroyBuffer(device->Device, vertexBuffer.VertexBuffer, nullptr);
+        vkFreeMemory(device->Device, vertexBuffer.VertexBufferMemory, nullptr);
+    }
+
+    VulkanIndexBuffer vulkan_create_index_buffer(const std::shared_ptr<GraphicsDevice> device, const std::vector<VulkanIndex>& indices) {
+        VulkanIndexBuffer indexBuffer = {};
+        indexBuffer.IndexCount = static_cast<u32>(indices.size());
+        ASSERT(indexBuffer.IndexCount > 2, "Index Count must be at least 3!");
+        VkDeviceSize bufferSize = sizeof(indices[0]) * indexBuffer.IndexCount;
+
+        VkBuffer stagingBuffer;
+        VkDeviceMemory stagingMemory;
+
+        vulkan_create_buffer(
+            device->PhysicalDevice,
+            device->Device,
+            bufferSize,
+            VK_BUFFER_USAGE_TRANSFER_SRC_BIT,
+            VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+            stagingBuffer,
+            stagingMemory
+        );
+
+        void* data;
+        vkMapMemory(device->Device, stagingMemory, 0, bufferSize, 0, &data);
+        memcpy(data, indices.data(), static_cast<u32>(bufferSize));
+        vkUnmapMemory(device->Device, stagingMemory);
+
+        vulkan_create_buffer(
+            device->PhysicalDevice,
+            device->Device,
+            bufferSize,
+            VK_BUFFER_USAGE_TRANSFER_DST_BIT | VK_BUFFER_USAGE_INDEX_BUFFER_BIT,
+            VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT,
+            indexBuffer.IndexBuffer,
+            indexBuffer.IndexBufferMemory
+        );
+
+        vulkan_copy_buffer(
+            device,
+            stagingBuffer,
+            indexBuffer.IndexBuffer,
+            bufferSize
+        );
+
+        vkDestroyBuffer(device->Device, stagingBuffer, nullptr);
+        vkFreeMemory(device->Device, stagingMemory, nullptr);
+
+        return indexBuffer;
+    }
+
+    void vulkan_destroy_index_buffer(const std::shared_ptr<GraphicsDevice> device, const VulkanIndexBuffer& indexBuffer) {
+        vkDestroyBuffer(device->Device, indexBuffer.IndexBuffer, nullptr);
+        vkFreeMemory(device->Device, indexBuffer.IndexBufferMemory, nullptr);
     }
 }

@@ -26,65 +26,51 @@ namespace Badger
         // Load a model here ...
 
         std::vector<VulkanVertex> cubeVertices = {
-            // left face (white)
-            {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-            {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-            {{-.5f, -.5f, .5f}, {.9f, .9f, .9f}},
-            {{-.5f, -.5f, -.5f}, {.9f, .9f, .9f}},
-            {{-.5f, .5f, -.5f}, {.9f, .9f, .9f}},
-            {{-.5f, .5f, .5f}, {.9f, .9f, .9f}},
-
-            // right face (yellow)
-            {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-            {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-            {{.5f, -.5f, .5f}, {.8f, .8f, .1f}},
-            {{.5f, -.5f, -.5f}, {.8f, .8f, .1f}},
-            {{.5f, .5f, -.5f}, {.8f, .8f, .1f}},
-            {{.5f, .5f, .5f}, {.8f, .8f, .1f}},
-
-            // top face (orange, remember y axis points down)
-            {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-            {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-            {{-.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-            {{-.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-            {{.5f, -.5f, -.5f}, {.9f, .6f, .1f}},
-            {{.5f, -.5f, .5f}, {.9f, .6f, .1f}},
-
-            // bottom face (red)
-            {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-            {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-            {{-.5f, .5f, .5f}, {.8f, .1f, .1f}},
-            {{-.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-            {{.5f, .5f, -.5f}, {.8f, .1f, .1f}},
-            {{.5f, .5f, .5f}, {.8f, .1f, .1f}},
-
-            // nose face (blue)
-            {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-            {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-            {{-.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-            {{-.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-            {{.5f, -.5f, 0.5f}, {.1f, .1f, .8f}},
-            {{.5f, .5f, 0.5f}, {.1f, .1f, .8f}},
-
-            // tail face (green)
-            {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-            {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-            {{-.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
-            {{-.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-            {{.5f, -.5f, -0.5f}, {.1f, .8f, .1f}},
-            {{.5f, .5f, -0.5f}, {.1f, .8f, .1f}},
+            {{-.5f, -.5f, +.5f}, {.8f, .8f, .2f}},
+            {{+.5f, -.5f, +.5f}, {.8f, .8f, .2f}},
+            {{-.5f, +.5f, +.5f}, {.8f, .8f, .2f}},
+            {{+.5f, +.5f, +.5f}, {.8f, .8f, .2f}},
+            {{-.5f, -.5f, -.5f}, {.2f, .8f, .8f}},
+            {{+.5f, -.5f, -.5f}, {.2f, .8f, .8f}},
+            {{-.5f, +.5f, -.5f}, {.2f, .8f, .8f}},
+            {{+.5f, +.5f, -.5f}, {.2f, .8f, .8f}},
         };
 
-        std::shared_ptr<Model> cubeModel = m_GraphicsContext->LoadModel(cubeVertices);
+        std::vector<VulkanIndex> cubeIndices = {
+            //Top
+            2, 6, 7,
+            2, 3, 7,
+
+            //Bottom
+            0, 4, 5,
+            0, 1, 5,
+
+            //Left
+            0, 2, 6,
+            0, 4, 6,
+
+            //Right
+            1, 3, 7,
+            1, 5, 7,
+
+            //Front
+            0, 2, 3,
+            0, 1, 3,
+
+            //Back
+            4, 6, 7,
+            4, 5, 7
+        };
+
+        std::shared_ptr<Model> cubeModel = m_GraphicsContext->LoadModel(cubeVertices, cubeIndices);
 
         Entity cube = Entity::Create();
         cube.Mesh = {cubeModel};
-        cube.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {1.0f, 0.5f, -5.0f});
 
         Scene scene;
-        for (i32 i = -80; i < 81; i++) {
-            for (i32 j = -40; j < 41; j++) {
-                cube.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {2.0f * (f32)i, 2.0f * (f32)j, -120.0f});
+        for (i32 i = -5; i < 6; i++) {
+            for (i32 j = -3; j < 4; j++) {
+                cube.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {2.0f * (f32)i, 2.0f * (f32)j, -10.0f});
                 scene.Entities.push_back(cube);
             }
         }

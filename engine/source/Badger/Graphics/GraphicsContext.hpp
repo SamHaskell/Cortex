@@ -31,8 +31,8 @@ namespace Badger {
             bool OnFramebufferResize(i32 width, i32 height);
             bool RecreateSwapchain();
 
-            inline std::shared_ptr<Model> LoadModel(const std::vector<VulkanVertex>& vertices) {
-                return std::make_shared<Model>(m_GraphicsDevice, vertices);
+            inline std::shared_ptr<Model> LoadModel(const std::vector<VulkanVertex>& vertices, const std::vector<VulkanIndex>& indices) {
+                return std::make_shared<Model>(m_GraphicsDevice, vertices, indices);
             }
             
         private:
