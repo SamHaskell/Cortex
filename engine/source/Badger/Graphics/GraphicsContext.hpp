@@ -23,11 +23,13 @@ namespace Badger {
             inline std::shared_ptr<GraphicsDevice> GetDevice() { return m_GraphicsDevice; }
             inline RenderPass GetRenderPass() { return m_RenderPass; }
 
-            VkCommandBuffer BeginFrame();
+            bool BeginFrame(VkCommandBuffer& commandBuffer);
             bool BeginRenderPass(VkCommandBuffer commandBuffer);
             bool EndRenderPass(VkCommandBuffer commandBuffer);
             bool EndFrame();
-            bool RecreateSwapchain(i32 width, i32 height);
+
+            bool OnFramebufferResize(i32 width, i32 height);
+            bool RecreateSwapchain();
 
             inline std::shared_ptr<Model> LoadModel(const std::vector<VulkanVertex>& vertices) {
                 return std::make_shared<Model>(m_GraphicsDevice, vertices);
@@ -40,6 +42,7 @@ namespace Badger {
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
             VulkanSwapchainSpecification m_SwapchainSpec;
             RenderPass m_RenderPass;
+            bool m_SwapchainSuboptimal;
             std::unique_ptr<Swapchain> m_Swapchain;
             VulkanDepthResources m_VulkanDepthResources;
             std::vector<VulkanFrameResources> m_FrameResources;

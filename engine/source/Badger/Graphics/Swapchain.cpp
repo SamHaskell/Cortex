@@ -26,7 +26,6 @@ namespace Badger {
 
     VkResult Swapchain::SwapBuffers(const VkFence& inFlightFence, const VkSemaphore& imageAvailableSemaphore) {
         vkWaitForFences(m_GraphicsDevice->Device, 1, &inFlightFence, VK_TRUE, std::numeric_limits<u64>::max());
-        vkResetFences(m_GraphicsDevice->Device, 1, &inFlightFence);
         VkResult result = vkAcquireNextImageKHR(
             m_GraphicsDevice->Device, m_SwapchainHandle, 
             std::numeric_limits<u64>::max(), 

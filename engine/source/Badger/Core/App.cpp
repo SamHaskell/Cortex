@@ -82,21 +82,19 @@ namespace Badger
         cube.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {1.0f, 0.5f, -5.0f});
 
         Scene scene;
-        for (i32 i = -20; i < 21; i++) {
-            for (i32 j = -10; j < 11; j++) {
-                cube.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {2.0f * (f32)i, 2.0f * (f32)j, -40.0f});
+        for (i32 i = -80; i < 81; i++) {
+            for (i32 j = -40; j < 41; j++) {
+                cube.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {2.0f * (f32)i, 2.0f * (f32)j, -120.0f});
                 scene.Entities.push_back(cube);
             }
         }
 
         scene.MainCamera.SetView({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f, 0.0f});
 
-        f64 dt = 0.0; // TEMP
+        f64 dt = 0.0;
         auto now = std::chrono::high_resolution_clock::now();
         while (m_Running) {    
             m_Window->Update(dt);
-
-            LOG_DEBUG("Frame-Time: %lf", dt);
 
             scene.MainCamera.SetPerspectiveProjection(glm::radians(70.0f), 1.8f, 0.01f, 1000.0f);
 
@@ -104,17 +102,19 @@ namespace Badger
                 e.Transform.ModelToWorld = glm::rotate(e.Transform.ModelToWorld, 1.0f * (f32)dt, {0.2f, 0.7f, -1.0f});
             }
 
-            auto cmd = m_GraphicsContext->BeginFrame();
-            m_GraphicsContext->BeginRenderPass(cmd);
-
-            m_Renderer->DrawScene(cmd, scene);
-
-            m_GraphicsContext->EndRenderPass(cmd);
-            m_GraphicsContext->EndFrame();
+            VkCommandBuffer cmd;
+            if (m_GraphicsContext->BeginFrame(cmd)) {
+                m_GraphicsContext->BeginRenderPass(cmd);
+                m_Renderer->DrawScene(cmd, scene);
+                m_GraphicsContext->EndRenderPass(cmd);
+                m_GraphicsContext->EndFrame();
+            }
 
             auto next = std::chrono::high_resolution_clock::now();
             dt = std::chrono::duration<f64, std::chrono::seconds::period>(next - now).count();
             now = next;
+
+            LOG_DEBUG("Frame-Time: %lfms", dt*1000.0);
         }
 
         vkDeviceWaitIdle(m_GraphicsContext->GetDevice()->Device);
@@ -131,6 +131,10 @@ namespace Badger
             break;
         case EventTag::KeyEvent:
             LOG_INFO("Key Press: %i", e.KeyEvent.KeyCode);
+            break;
+        case EventTag::WindowFramebufferSizeEvent:
+            m_GraphicsContext->OnFramebufferResize(e.WindowFramebufferSizeEvent.Width, e.WindowFramebufferSizeEvent.Height);
+            break;
         default:
             break;
         }

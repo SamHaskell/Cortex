@@ -17,6 +17,8 @@ namespace Badger {
         
         m_GraphicsDevice = GraphicsDevice::Create(defaultVulkanConfig, window);
 
+        m_SwapchainSuboptimal = false;
+
         m_SwapchainSpec = vulkan_create_swapchain_spec(
                                                 m_GraphicsDevice->PhysicalDevice, 
                                                 m_GraphicsDevice->Device, 
@@ -36,16 +38,28 @@ namespace Badger {
         vkDestroyRenderPass(m_GraphicsDevice->Device, m_RenderPass.Pass, nullptr);
     }
 
-    VkCommandBuffer GraphicsContext::BeginFrame() {
+    bool GraphicsContext::BeginFrame(VkCommandBuffer& commandBuffer) {
         VulkanFrameResources frameData = m_FrameResources[m_CurrentFrameIndex];
 
         VkResult result = m_Swapchain->SwapBuffers(frameData.InFlightFence, frameData.ImageAvailableSemaphore);
         
         if (result == VK_ERROR_OUT_OF_DATE_KHR) {
             LOG_WARN("Swapchain out of date!");
+            m_SwapchainSuboptimal = true;
         } else if (result == VK_SUBOPTIMAL_KHR) {
             LOG_WARN("Swapchain suboptimal!");
+            // m_SwapchainSuboptimal = true;
+        } else if (result != VK_SUCCESS) {
+            LOG_WARN("Couldn't retrieve image from swapchain!");
+            m_SwapchainSuboptimal = true;
         }
+
+        if (m_SwapchainSuboptimal) {
+            RecreateSwapchain();
+            return false;
+        }
+
+        vkResetFences(m_GraphicsDevice->Device, 1, &frameData.InFlightFence);
 
         vkResetCommandBuffer(frameData.CommandBuffer, 0);
     
@@ -55,7 +69,8 @@ namespace Badger {
         result = vkBeginCommandBuffer(frameData.CommandBuffer, &beginInfo);
         ASSERT(result == VK_SUCCESS, "Failed to begin recording a Vulkan command buffer!");
 
-        return frameData.CommandBuffer;
+        commandBuffer = frameData.CommandBuffer;
+        return true;
     }
 
     bool GraphicsContext::BeginRenderPass(VkCommandBuffer commandBuffer) {
@@ -91,7 +106,6 @@ namespace Badger {
 
     bool GraphicsContext::EndRenderPass(VkCommandBuffer commandBuffer) {
         vkCmdEndRenderPass(commandBuffer);
-
         return true;
     }
 
@@ -125,7 +139,16 @@ namespace Badger {
         return true;
     }
     
-    bool GraphicsContext::RecreateSwapchain(i32 width, i32 height) {
+    bool GraphicsContext::OnFramebufferResize(i32 width, i32 height) {
+        m_SwapchainSuboptimal = true;
+        m_SwapchainSpec.Extent.width = width;
+        m_SwapchainSpec.Extent.height = height;
+        return true;
+    }
+
+    bool GraphicsContext::RecreateSwapchain() {
+        m_Swapchain = Swapchain::Create(m_GraphicsDevice, m_SwapchainSpec, m_RenderPass);
+        m_SwapchainSuboptimal = false;
         return true;
     }
 }
