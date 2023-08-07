@@ -36,6 +36,7 @@ namespace Badger
 
         inline i32 GetFramebufferWidth() { return m_WindowState.FramebufferWidth; }
         inline i32 GetFramebufferHeight() { return m_WindowState.FramebufferHeight; }
+        inline f32 GetAspectRatio() { return (f32)m_WindowState.FramebufferWidth / (f32)m_WindowState.FramebufferHeight; }
 
         void GetVulkanSurface(VkInstance instance, VkSurfaceKHR& surface);
 

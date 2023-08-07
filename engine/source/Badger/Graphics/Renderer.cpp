@@ -13,6 +13,8 @@ namespace Badger {
         pipelineConfig.RenderPass = context->GetRenderPass().Pass;
         pipelineConfig.PipelineLayout = m_PipelineLayout;
         m_Pipeline = Pipeline::Create(m_GraphicsDevice, "../../testbed/assets/shaders/basic.vert.spv", "../../testbed/assets/shaders/basic.frag.spv", pipelineConfig);
+
+        m_Texture = vulkan_create_texture_2D(m_GraphicsDevice, "../../testbed/assets/textures/tex_DebugGrid.png");
     }
 
     Renderer::~Renderer() {

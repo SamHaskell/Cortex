@@ -34,6 +34,11 @@ namespace Badger {
     std::vector<VulkanFrameResources> vulkan_create_frame_resources(VkDevice device, u32 count, u32 queueIndex);
     void vulkan_destroy_frame_resources(VkDevice device, std::vector<VulkanFrameResources> frameResources);
 
+    // MISC
+
+    VkCommandBuffer vulkan_begin_transient_commands(VkDevice device, VkCommandPool commandPool);
+    void vulkan_end_transient_commands(VkDevice device, VkCommandPool commandPool, VkQueue queue, VkCommandBuffer commandBuffer);
+
     // SWAPCHAIN CREATION
 
     void vulkan_create_swapchain(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, const VulkanSwapchainSpecification &config, VkSwapchainKHR& outSwapchain);
@@ -60,4 +65,9 @@ namespace Badger {
 
     u32 vulkan_find_memory_type(u32 typeFilter, VkMemoryPropertyFlags properties, VkPhysicalDevice physicalDevice);
 
+    // IMAGE STUFF
+
+    void vulkan_create_image(VkDevice device, VkPhysicalDevice physicalDevice, u32 width, u32 height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
+    void vulkan_transition_image_layout(VkDevice device, VkCommandPool commandPool, VkQueue queue, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
+    void vulkan_copy_buffer_to_image(VkDevice device, VkCommandPool commandPool, VkQueue queue, VkBuffer buffer, VkImage image, u32 width, u32 height);
 }

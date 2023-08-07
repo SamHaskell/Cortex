@@ -3,6 +3,7 @@
 #include "Badger/Graphics/VulkanHelpers.hpp"
 #include "Badger/Graphics/VulkanTypes.hpp"
 
+#include "Badger/Graphics/VulkanImages.hpp"
 #include "Badger/Graphics/GraphicsContext.hpp"
 #include "Badger/Graphics/Pipeline.hpp"
 
@@ -21,5 +22,6 @@ namespace Badger {
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
             VkPipelineLayout m_PipelineLayout;
             std::shared_ptr<Pipeline> m_Pipeline;
+            VulkanTexture2D m_Texture;
     };
 }

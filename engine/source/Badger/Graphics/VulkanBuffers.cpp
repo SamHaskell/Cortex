@@ -3,39 +3,13 @@
 namespace Badger {
 
     void vulkan_copy_buffer(const std::shared_ptr<GraphicsDevice> device, VkBuffer src, VkBuffer dst, VkDeviceSize size) {
-        VkCommandBufferAllocateInfo allocInfo{};
-        allocInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_ALLOCATE_INFO;
-        allocInfo.level = VK_COMMAND_BUFFER_LEVEL_PRIMARY;
-        allocInfo.commandPool = device->TransferCommandPool;
-        allocInfo.commandBufferCount = 1;
-
-        VkCommandBuffer commandBuffer;
-        vkAllocateCommandBuffers(device->Device, &allocInfo, &commandBuffer);
-
-        VkCommandBufferBeginInfo beginInfo = {};
-        beginInfo.sType = VK_STRUCTURE_TYPE_COMMAND_BUFFER_BEGIN_INFO;
-        beginInfo.flags = VK_COMMAND_BUFFER_USAGE_ONE_TIME_SUBMIT_BIT;
-
-        vkBeginCommandBuffer(commandBuffer, &beginInfo);
-
+        VkCommandBuffer commandBuffer = vulkan_begin_transient_commands(device->Device, device->TransferCommandPool);
         VkBufferCopy copyRegion = {};
         copyRegion.srcOffset = 0;
         copyRegion.dstOffset = 0;
         copyRegion.size = size;
-
         vkCmdCopyBuffer(commandBuffer, src, dst, 1, &copyRegion);
-
-        vkEndCommandBuffer(commandBuffer);
-
-        VkSubmitInfo submitInfo = {};
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &commandBuffer;
-
-        vkQueueSubmit(device->Queues.Transfer, 1, &submitInfo, VK_NULL_HANDLE);
-        vkQueueWaitIdle(device->Queues.Transfer);
-
-        vkFreeCommandBuffers(device->Device, device->TransferCommandPool, 1, &commandBuffer);
+        vulkan_end_transient_commands(device->Device, device->TransferCommandPool, device->Queues.Transfer, commandBuffer);
     }
 
     VulkanVertexBuffer vulkan_create_vertex_buffer(const std::shared_ptr<GraphicsDevice> device, const std::vector<VulkanVertex>& vertices) {

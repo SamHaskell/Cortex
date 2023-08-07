@@ -1,8 +1,6 @@
 #include "Badger/Core/App.hpp"
 
 #include <iostream>
-#include <cstdlib>
-#include <unistd.h>
 
 namespace Badger
 {
@@ -14,6 +12,8 @@ namespace Badger
 
         m_GraphicsContext = std::make_unique<GraphicsContext>(m_Window);
         m_Renderer = std::make_unique<Renderer>(m_GraphicsContext);
+
+        m_AspectRatio = m_Window->GetAspectRatio();
     }
 
     App::~App()
@@ -62,12 +62,31 @@ namespace Badger
             4, 5, 7
         };
 
+        std::vector<VulkanVertex> quadVertices = {
+            {{-.5f, -.5f, .0f}, {1.0f, 1.0f, 1.0f}},
+            {{+.5f, -.5f, .0f}, {1.0f, 1.0f, 1.0f}},
+            {{+.5f, +.5f, .0f}, {1.0f, 1.0f, 1.0f}},
+            {{-.5f, +.5f, .0f}, {1.0f, 1.0f, 1.0f}},
+        };
+
+        std::vector<VulkanIndex> quadIndices = {
+            0, 1, 2, 2, 3, 0
+        };
+
         std::shared_ptr<Model> cubeModel = m_GraphicsContext->LoadModel(cubeVertices, cubeIndices);
+        std::shared_ptr<Model> quadModel = m_GraphicsContext->LoadModel(quadVertices, quadIndices);
 
         Entity cube = Entity::Create();
         cube.Mesh = {cubeModel};
 
+        Entity quad = Entity::Create();
+        quad.Mesh = {quadModel};
+        
         Scene scene;
+
+        quad.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, -2.0f});
+        scene.Entities.push_back(quad);
+        
         for (i32 i = -5; i < 6; i++) {
             for (i32 j = -3; j < 4; j++) {
                 cube.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {2.0f * (f32)i, 2.0f * (f32)j, -10.0f});
@@ -82,7 +101,7 @@ namespace Badger
         while (m_Running) {    
             m_Window->Update(dt);
 
-            scene.MainCamera.SetPerspectiveProjection(glm::radians(70.0f), 1.8f, 0.01f, 1000.0f);
+            scene.MainCamera.SetPerspectiveProjection(glm::radians(70.0f), m_AspectRatio, 0.01f, 1000.0f);
 
             for (auto& e : scene.Entities) {
                 e.Transform.ModelToWorld = glm::rotate(e.Transform.ModelToWorld, 1.0f * (f32)dt, {0.2f, 0.7f, -1.0f});
@@ -120,6 +139,7 @@ namespace Badger
             break;
         case EventTag::WindowFramebufferSizeEvent:
             m_GraphicsContext->OnFramebufferResize(e.WindowFramebufferSizeEvent.Width, e.WindowFramebufferSizeEvent.Height);
+            m_AspectRatio = m_Window->GetAspectRatio();
             break;
         default:
             break;

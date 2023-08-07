@@ -6,7 +6,6 @@
 #include "Badger/Graphics/GraphicsDevice.hpp"
 
 namespace Badger {
-    
     struct VulkanVertexBuffer {
         VkBuffer VertexBuffer;
         VkDeviceMemory VertexBufferMemory;

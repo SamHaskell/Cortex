@@ -14,6 +14,8 @@ namespace Badger {
 
         m_WindowHandle = glfwCreateWindow(1280, 720, "Application", nullptr, nullptr);
 
+        glfwGetFramebufferSize(m_WindowHandle, &m_WindowState.FramebufferWidth, &m_WindowState.FramebufferHeight);
+
         glfwSetWindowUserPointer(m_WindowHandle, &m_WindowState);
 
         glfwSetWindowCloseCallback(m_WindowHandle, [](GLFWwindow *window)

@@ -29,6 +29,7 @@ namespace Badger
         std::unique_ptr<Window> m_Window;
         std::unique_ptr<GraphicsContext> m_GraphicsContext;
         std::unique_ptr<Renderer> m_Renderer;
+        f32 m_AspectRatio;
     };
 
     App *CreateApp();

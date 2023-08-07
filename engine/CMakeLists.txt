@@ -16,10 +16,12 @@ set(
     VENDOR_INCLUDE_DIRS
     ${PROJECT_SOURCE_DIR}/vendor/glfw/include
     ${PROJECT_SOURCE_DIR}/vendor/glm
+    ${PROJECT_SOURCE_DIR}/vendor/stb
 )
 
 set(
     VENDOR_SOURCES
+    ${PROJECT_SOURCE_DIR}/vendor/stb/stb_image_impl.cpp
 )
 
 ################### LIBRARY ##################
@@ -40,6 +42,7 @@ set(
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanHelpers.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanTypes.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanBuffers.hpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanImages.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/GraphicsContext.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/GraphicsDevice.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Swapchain.hpp
@@ -70,6 +73,7 @@ set(
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanHelpers.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanTypes.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanBuffers.cpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/VulkanImages.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/GraphicsContext.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/GraphicsDevice.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Swapchain.cpp
