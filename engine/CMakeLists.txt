@@ -1,7 +1,7 @@
 project(
-    Badger
+    Cortex
     VERSION 0.1
-    DESCRIPTION "Badger Engine"
+    DESCRIPTION "Cortex Engine"
     LANGUAGES C CXX
 )
 

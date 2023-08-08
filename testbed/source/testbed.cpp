@@ -1,8 +1,6 @@
-#include <Badger.hpp>
+#include <Cortex.hpp>
 
-#include "other.hpp"
-
-class Testbed : public Badger::App {
+class Testbed : public Cortex::App {
     public:
         Testbed() {
 
@@ -13,6 +11,6 @@ class Testbed : public Badger::App {
     private:
 };
 
-Badger::App *Badger::CreateApp() {
+Cortex::App *Cortex::CreateApp() {
     return new Testbed();
 }

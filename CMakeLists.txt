@@ -3,7 +3,7 @@ cmake_minimum_required(
 )
 
 project(
-    BadgerDev
+    CortexDev
     VERSION 0.1
     LANGUAGES CXX
 )
