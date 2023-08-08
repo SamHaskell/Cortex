@@ -29,6 +29,7 @@ namespace Badger {
 
     struct VulkanVertex {
         glm::vec3 Position;
+        glm::vec3 Normal;
         glm::vec3 Color;
         glm::vec2 TexCoord;
         static std::vector<VkVertexInputBindingDescription> BindingDescriptions();

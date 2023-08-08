@@ -49,6 +49,7 @@ set(
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/GraphicsDevice.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Swapchain.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Renderer.hpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Material.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Shader.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Pipeline.hpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Model.hpp
@@ -80,6 +81,7 @@ set(
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/GraphicsDevice.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Swapchain.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Renderer.cpp
+    ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Material.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Shader.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Pipeline.cpp
     ${PROJECT_SOURCE_DIR}/source/${PROJECT_NAME}/Graphics/Model.cpp

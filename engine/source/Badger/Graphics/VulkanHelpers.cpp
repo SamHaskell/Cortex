@@ -299,7 +299,6 @@ namespace Badger {
             if (mode == VK_PRESENT_MODE_MAILBOX_KHR) {
                 return mode;
             }
-            LOG_DEBUG("%s", string_VkPresentModeKHR(mode));
         }
         return VK_PRESENT_MODE_FIFO_KHR;
     }

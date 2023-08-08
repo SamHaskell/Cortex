@@ -26,14 +26,14 @@ namespace Badger
         // Load a model here ...
 
         std::vector<VulkanVertex> cubeVertices = {
-            {{-.5f, -.5f, +.5f}, {.8f, .8f, .2f}},
-            {{+.5f, -.5f, +.5f}, {.8f, .8f, .2f}},
-            {{-.5f, +.5f, +.5f}, {.8f, .8f, .2f}},
-            {{+.5f, +.5f, +.5f}, {.8f, .8f, .2f}},
-            {{-.5f, -.5f, -.5f}, {.2f, .8f, .8f}},
-            {{+.5f, -.5f, -.5f}, {.2f, .8f, .8f}},
-            {{-.5f, +.5f, -.5f}, {.2f, .8f, .8f}},
-            {{+.5f, +.5f, -.5f}, {.2f, .8f, .8f}},
+            {.Position = {-.5f, -.5f, +.5f}, .Color = {1.0f, 1.0f, 1.0f}},
+            {.Position = {+.5f, -.5f, +.5f}, .Color = {1.0f, 1.0f, 1.0f}},
+            {.Position = {-.5f, +.5f, +.5f}, .Color = {1.0f, 1.0f, 1.0f}},
+            {.Position = {+.5f, +.5f, +.5f}, .Color = {1.0f, 1.0f, 1.0f}},
+            {.Position = {-.5f, -.5f, -.5f}, .Color = {1.0f, 1.0f, 1.0f}},
+            {.Position = {+.5f, -.5f, -.5f}, .Color = {1.0f, 1.0f, 1.0f}},
+            {.Position = {-.5f, +.5f, -.5f}, .Color = {1.0f, 1.0f, 1.0f}},
+            {.Position = {+.5f, +.5f, -.5f}, .Color = {1.0f, 1.0f, 1.0f}},
         };
 
         std::vector<VulkanIndex> cubeIndices = {
@@ -63,10 +63,10 @@ namespace Badger
         };
 
         std::vector<VulkanVertex> quadVertices = {
-            {{-.5f, -.5f, .0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
-            {{+.5f, -.5f, .0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
-            {{+.5f, +.5f, .0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
-            {{-.5f, +.5f, .0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
+            {.Position = {-.5f, -.5f, .0f}, .Normal = {0.0f, 0.0f, 1.0f}, .Color = {1.0f, 1.0f, 1.0f}, .TexCoord = {1.0f, 0.0f}},
+            {.Position = {+.5f, -.5f, .0f}, .Normal = {0.0f, 0.0f, 1.0f}, .Color = {1.0f, 1.0f, 1.0f}, .TexCoord = {0.0f, 0.0f}},
+            {.Position = {+.5f, +.5f, .0f}, .Normal = {0.0f, 0.0f, 1.0f}, .Color = {1.0f, 1.0f, 1.0f}, .TexCoord = {0.0f, 1.0f}},
+            {.Position = {-.5f, +.5f, .0f}, .Normal = {0.0f, 0.0f, 1.0f}, .Color = {1.0f, 1.0f, 1.0f}, .TexCoord = {1.0f, 1.0f}},
         };
 
         std::vector<VulkanIndex> quadIndices = {
@@ -129,7 +129,7 @@ namespace Badger
             dt = std::chrono::duration<f64, std::chrono::seconds::period>(next - now).count();
             now = next;
 
-            LOG_DEBUG("Frame-Time: %lfms", dt*1000.0);
+            // LOG_DEBUG("Frame-Time: %lfms", dt*1000.0);
         }
 
         vkDeviceWaitIdle(m_GraphicsContext->GetDevice()->Device);

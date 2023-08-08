@@ -1,0 +1,1 @@
+#include "Badger/Graphics/Material.hpp"

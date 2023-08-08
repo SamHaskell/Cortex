@@ -5,6 +5,8 @@ namespace Badger {
         m_GraphicsDevice = device;
         m_VertexBuffer = vulkan_create_vertex_buffer(m_GraphicsDevice, vertices);
         m_IndexBuffer = vulkan_create_index_buffer(m_GraphicsDevice, indices);
+
+        LOG_INFO("Vertices: %i. Indices: %i.", m_VertexBuffer.VertexCount, m_IndexBuffer.IndexCount);
     }
 
     Model::~Model() {
