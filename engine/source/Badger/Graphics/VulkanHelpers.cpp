@@ -22,8 +22,9 @@ namespace Badger {
         return config;
     }
 
-    VkRenderPass vulkan_create_renderpass(VkDevice device, const VulkanSwapchainSpecification& config) {
+    VkRenderPass vulkan_create_renderpass(VkPhysicalDevice physicalDevice, VkDevice device, const VulkanSwapchainSpecification& config) {
         VkRenderPass renderpass;
+
         VkAttachmentDescription colorAttachment = {};
         colorAttachment.format = config.SurfaceFormat.format;
         colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
@@ -34,27 +35,48 @@ namespace Badger {
         colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
+        VkAttachmentDescription depthAttachment = {};
+        depthAttachment.format = vulkan_find_supported_format(
+            physicalDevice, 
+            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+        );
+        depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
+        depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
         VkAttachmentReference colorAttachmentRef = {};
         colorAttachmentRef.attachment = 0;
         colorAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
+        VkAttachmentReference depthAttachmentRef{};
+        depthAttachmentRef.attachment = 1;
+        depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
         VkSubpassDescription subpass = {};
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpass.colorAttachmentCount = 1;
         subpass.pColorAttachments = &colorAttachmentRef;
+        subpass.pDepthStencilAttachment = &depthAttachmentRef;
 
         VkSubpassDependency dependancy = {};
         dependancy.srcSubpass = VK_SUBPASS_EXTERNAL;
         dependancy.dstSubpass = 0;
-        dependancy.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+        dependancy.srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
         dependancy.srcAccessMask = 0;
-        dependancy.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-        dependancy.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+        dependancy.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
+        dependancy.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
+        std::array<VkAttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
         VkRenderPassCreateInfo renderpassCreateInfo = {};
         renderpassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
-        renderpassCreateInfo.attachmentCount = 1;
-        renderpassCreateInfo.pAttachments = &colorAttachment;
+        renderpassCreateInfo.attachmentCount = static_cast<u32>(attachments.size());
+        renderpassCreateInfo.pAttachments = attachments.data();
         renderpassCreateInfo.subpassCount = 1;
         renderpassCreateInfo.pSubpasses = &subpass;
         renderpassCreateInfo.dependencyCount = 1;
@@ -66,7 +88,7 @@ namespace Badger {
         return renderpass;
     }
     
-    VkPipelineLayout vulkan_create_pipeline_layout(VkDevice device) {
+    VkPipelineLayout vulkan_create_pipeline_layout(VkDevice device, const VkDescriptorSetLayout& descriptorSetLayout) {
         VkPushConstantRange pushRange = {};
         pushRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
         pushRange.size = sizeof(VulkanPushData);
@@ -75,8 +97,8 @@ namespace Badger {
         layoutInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
         layoutInfo.pushConstantRangeCount = 1;
         layoutInfo.pPushConstantRanges = &pushRange;
-        layoutInfo.setLayoutCount = 0;
-        layoutInfo.pSetLayouts = nullptr;
+        layoutInfo.setLayoutCount = 1;
+        layoutInfo.pSetLayouts = &descriptorSetLayout;
 
         VkPipelineLayout layout;
         VkResult result = vkCreatePipelineLayout(device, &layoutInfo, nullptr, &layout);
@@ -151,6 +173,10 @@ namespace Badger {
         VkPhysicalDeviceFeatures deviceFeatures;
         vkGetPhysicalDeviceFeatures(physicalDevice, &deviceFeatures);
 
+        if (!deviceFeatures.samplerAnisotropy) {
+            return false;
+        }
+
         if (!vulkan_check_device_extension_support(physicalDevice, requirements.DeviceExtensions)) {
             return false;
         }
@@ -182,6 +208,8 @@ namespace Badger {
             std::cout << "Device does not have the requested Compute Queue\n";
             return false;
         }
+
+
 
         // TODO: Implement some scoring regime for different GPU's
         score = 1;
@@ -359,6 +387,7 @@ namespace Badger {
         }
 
         VkPhysicalDeviceFeatures deviceFeatures = {};
+        deviceFeatures.samplerAnisotropy = VK_TRUE;
 
         VkDeviceCreateInfo deviceCreateInfo = {};
         deviceCreateInfo.sType = VK_STRUCTURE_TYPE_DEVICE_CREATE_INFO;
@@ -491,36 +520,20 @@ namespace Badger {
         outImageViews.resize(config.ImageCount);
         for (u32 i = 0; i < config.ImageCount; i++)
         {
-            VkImageViewCreateInfo viewCreateInfo = {};
-            viewCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
-            viewCreateInfo.image = images[i];
-            viewCreateInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
-            viewCreateInfo.format = config.SurfaceFormat.format;
-            viewCreateInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
-            viewCreateInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
-            viewCreateInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
-            viewCreateInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
-            viewCreateInfo.subresourceRange.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-            viewCreateInfo.subresourceRange.baseMipLevel = 0;
-            viewCreateInfo.subresourceRange.levelCount = 1;
-            viewCreateInfo.subresourceRange.baseArrayLayer = 0;
-            viewCreateInfo.subresourceRange.layerCount = 1;
-
-            VkResult result = vkCreateImageView(device, &viewCreateInfo, nullptr, &outImageViews[i]);
-            ASSERT(result == VK_SUCCESS, "Failed to create Vulkan swapchain image views!");
+            outImageViews[i] = vulkan_create_image_view(device, images[i], config.SurfaceFormat.format, VK_IMAGE_ASPECT_COLOR_BIT);
         }
     }
     
-    void vulkan_create_swapchain_framebuffers(VkDevice device, VulkanSwapchainSpecification config, std::vector<VkImageView> swapchainImageViews, VkRenderPass renderpass, std::vector<VkFramebuffer>& outFramebuffers) {
+    void vulkan_create_swapchain_framebuffers(VkDevice device, VulkanSwapchainSpecification config, std::vector<VkImageView> swapchainImageViews, VkImageView depthImageView, VkRenderPass renderpass, std::vector<VkFramebuffer>& outFramebuffers) {
         outFramebuffers.resize(config.ImageCount);
         for (u32 i = 0; i < config.ImageCount; i++) {
             VkImageView attachments[] = {
-                swapchainImageViews[i]
+                swapchainImageViews[i], depthImageView
             };
             VkFramebufferCreateInfo framebufferCreateInfo = {};
             framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferCreateInfo.renderPass = renderpass;
-            framebufferCreateInfo.attachmentCount = 1;
+            framebufferCreateInfo.attachmentCount = 2;
             framebufferCreateInfo.pAttachments = attachments;
             framebufferCreateInfo.width = config.Extent.width;
             framebufferCreateInfo.height = config.Extent.height;
@@ -529,6 +542,19 @@ namespace Badger {
             VkResult result = vkCreateFramebuffer(device, &framebufferCreateInfo, nullptr, &outFramebuffers[i]);
             assert(result == VK_SUCCESS);
         }
+    }
+
+    VkFormat vulkan_find_supported_format(VkPhysicalDevice physicalDevice, const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features) {
+        for (VkFormat format : candidates) {
+            VkFormatProperties props;
+            vkGetPhysicalDeviceFormatProperties(physicalDevice, format, &props);
+            if (tiling == VK_IMAGE_TILING_LINEAR && (props.linearTilingFeatures & features) == features) {
+                return format;
+            } else if (tiling == VK_IMAGE_TILING_OPTIMAL && (props.optimalTilingFeatures & features) == features) {
+                return format;
+            }
+        }
+        ASSERT(false, "Failed to find supported format!");
     }
 
     // SHADER STUFF
@@ -661,7 +687,25 @@ namespace Badger {
         barrier.srcAccessMask = 0;
         barrier.dstAccessMask = 0;
 
-        vkCmdPipelineBarrier(commandBuffer, 0, 0, 0, 0, nullptr, 0, nullptr, 1, &barrier);
+        VkPipelineStageFlags sourceStage;
+        VkPipelineStageFlags destinationStage;
+
+        if (oldLayout == VK_IMAGE_LAYOUT_UNDEFINED && newLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL) {
+            barrier.srcAccessMask = 0;
+            barrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            sourceStage = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+            destinationStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+        } else if (oldLayout == VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL && newLayout == VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL) {
+            barrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+            barrier.dstAccessMask = VK_ACCESS_SHADER_READ_BIT;
+            sourceStage = VK_PIPELINE_STAGE_TRANSFER_BIT;
+            destinationStage = VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
+
+        } else {
+            ASSERT(false, "Unsupported image layout transition");
+        };
+
+        vkCmdPipelineBarrier(commandBuffer, sourceStage, destinationStage, 0, 0, nullptr, 0, nullptr, 1, &barrier);
 
         vulkan_end_transient_commands(device, commandPool, queue, commandBuffer);
     }
@@ -692,6 +736,29 @@ namespace Badger {
         );
 
         vulkan_end_transient_commands(device, commandPool, queue, commandBuffer);
+    }
+
+    VkImageView vulkan_create_image_view(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags) {
+        VkImageViewCreateInfo createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_IMAGE_VIEW_CREATE_INFO;
+        createInfo.image = image;
+        createInfo.viewType = VK_IMAGE_VIEW_TYPE_2D;
+        createInfo.format = format;
+        createInfo.components.r = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.g = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.b = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.components.a = VK_COMPONENT_SWIZZLE_IDENTITY;
+        createInfo.subresourceRange.aspectMask = aspectFlags;
+        createInfo.subresourceRange.baseMipLevel = 0;
+        createInfo.subresourceRange.levelCount = 1;
+        createInfo.subresourceRange.baseArrayLayer = 0;
+        createInfo.subresourceRange.layerCount = 1;
+
+        VkImageView imageView;
+        VkResult result = vkCreateImageView(device, &createInfo, nullptr, &imageView);
+        ASSERT(result == VK_SUCCESS, "Failed to create Vulkan image view!");
+
+        return imageView;
     }
 
 }

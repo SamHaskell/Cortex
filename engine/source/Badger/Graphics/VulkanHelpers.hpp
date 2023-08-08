@@ -7,8 +7,8 @@ namespace Badger {
     // MISC RESOURCE CREATION
 
     VulkanSwapchainSpecification vulkan_create_swapchain_spec(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, u32 width, u32 height);
-    VkRenderPass vulkan_create_renderpass(VkDevice device, const VulkanSwapchainSpecification& config);
-    VkPipelineLayout vulkan_create_pipeline_layout(VkDevice device);
+    VkRenderPass vulkan_create_renderpass(VkPhysicalDevice physicalDevice, VkDevice device, const VulkanSwapchainSpecification& config);
+    VkPipelineLayout vulkan_create_pipeline_layout(VkDevice device, const VkDescriptorSetLayout& descriptorSetLayout);
     VkCommandBuffer vulkan_create_command_buffer(VkDevice device, VkCommandPool commandPool);
     VkCommandPool vulkan_create_command_pool(VkDevice device, u32 queueIndex, VkCommandPoolCreateFlags flags);
 
@@ -44,7 +44,9 @@ namespace Badger {
     void vulkan_create_swapchain(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, const VulkanSwapchainSpecification &config, VkSwapchainKHR& outSwapchain);
     void vulkan_get_swapchain_images(VkDevice device, VkSwapchainKHR swapchain, std::vector<VkImage>& outImages);
     void vulkan_create_swapchain_image_views(VkDevice device, const VulkanSwapchainSpecification &config, const std::vector<VkImage> &images, std::vector<VkImageView>& outImageViews);
-    void vulkan_create_swapchain_framebuffers(VkDevice device, VulkanSwapchainSpecification config, std::vector<VkImageView> swapchainImageViews, VkRenderPass renderpass, std::vector<VkFramebuffer>& outFramebuffers);
+    void vulkan_create_swapchain_framebuffers(VkDevice device, VulkanSwapchainSpecification config, std::vector<VkImageView> swapchainImageViews, VkImageView depthImageView, VkRenderPass renderpass, std::vector<VkFramebuffer>& outFramebuffers);
+
+    VkFormat vulkan_find_supported_format(VkPhysicalDevice physicalDevice, const std::vector<VkFormat>& candidates, VkImageTiling tiling, VkFormatFeatureFlags features);
 
     // SHADER STUFF
 
@@ -70,4 +72,5 @@ namespace Badger {
     void vulkan_create_image(VkDevice device, VkPhysicalDevice physicalDevice, u32 width, u32 height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory);
     void vulkan_transition_image_layout(VkDevice device, VkCommandPool commandPool, VkQueue queue, VkImage image, VkFormat format, VkImageLayout oldLayout, VkImageLayout newLayout);
     void vulkan_copy_buffer_to_image(VkDevice device, VkCommandPool commandPool, VkQueue queue, VkBuffer buffer, VkImage image, u32 width, u32 height);
+    VkImageView vulkan_create_image_view(VkDevice device, VkImage image, VkFormat format, VkImageAspectFlags aspectFlags);
 }

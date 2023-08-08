@@ -10,7 +10,7 @@ namespace Badger {
     }
 
     std::vector<VkVertexInputAttributeDescription> VulkanVertex::AttributeDescriptions() {
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions(2);
+        std::vector<VkVertexInputAttributeDescription> attributeDescriptions(3);
         attributeDescriptions[0].binding = 0;
         attributeDescriptions[0].format = VK_FORMAT_R32G32B32_SFLOAT;
         attributeDescriptions[0].location = 0;
@@ -19,6 +19,11 @@ namespace Badger {
         attributeDescriptions[1].format = VK_FORMAT_R32G32B32_SFLOAT;
         attributeDescriptions[1].location = 1;
         attributeDescriptions[1].offset = offsetof(VulkanVertex, Color);
+        attributeDescriptions[2].binding = 0;
+        attributeDescriptions[2].format = VK_FORMAT_R32G32_SFLOAT;
+        attributeDescriptions[2].location = 2;
+        attributeDescriptions[2].offset = offsetof(VulkanVertex, TexCoord);
+
         return attributeDescriptions;
     }
 

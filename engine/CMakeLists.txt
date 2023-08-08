@@ -17,11 +17,13 @@ set(
     ${PROJECT_SOURCE_DIR}/vendor/glfw/include
     ${PROJECT_SOURCE_DIR}/vendor/glm
     ${PROJECT_SOURCE_DIR}/vendor/stb
+    ${PROJECT_SOURCE_DIR}/vendor/tiny
 )
 
 set(
     VENDOR_SOURCES
     ${PROJECT_SOURCE_DIR}/vendor/stb/stb_image_impl.cpp
+    ${PROJECT_SOURCE_DIR}/vendor/tiny/tiny_obj_loader_impl.cpp
 )
 
 ################### LIBRARY ##################

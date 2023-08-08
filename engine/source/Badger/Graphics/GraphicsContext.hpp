@@ -34,6 +34,8 @@ namespace Badger {
             inline std::shared_ptr<Model> LoadModel(const std::vector<VulkanVertex>& vertices, const std::vector<VulkanIndex>& indices) {
                 return std::make_shared<Model>(m_GraphicsDevice, vertices, indices);
             }
+
+            std::shared_ptr<Model> LoadModelFromOBJ(const std::string& path);
             
         private:
             u32 m_MaxFrameIndex;

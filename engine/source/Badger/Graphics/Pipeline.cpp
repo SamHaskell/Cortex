@@ -27,8 +27,8 @@ namespace Badger {
         config.Rasterizer.rasterizerDiscardEnable = VK_FALSE;
         config.Rasterizer.polygonMode = VK_POLYGON_MODE_FILL; // Others require GPU feature
         config.Rasterizer.lineWidth = 1.0f; // Changing required widelines GPU feature
-        config.Rasterizer.cullMode = VK_CULL_MODE_NONE;
-        config.Rasterizer.frontFace = VK_FRONT_FACE_CLOCKWISE;
+        config.Rasterizer.cullMode = VK_CULL_MODE_BACK_BIT;
+        config.Rasterizer.frontFace = VK_FRONT_FACE_COUNTER_CLOCKWISE;
         config.Rasterizer.depthBiasEnable = VK_FALSE;
         config.Rasterizer.depthBiasConstantFactor = 0.0f;
         config.Rasterizer.depthBiasClamp = 0.0f;
@@ -121,8 +121,7 @@ namespace Badger {
         createInfo.pInputAssemblyState = &config.InputAssembly;
         createInfo.pRasterizationState = &config.Rasterizer;
         createInfo.pMultisampleState = &config.Multisampler;
-        // createInfo.pDepthStencilState = &config.DepthStencil;
-        createInfo.pDepthStencilState = nullptr;
+        createInfo.pDepthStencilState = &config.DepthStencil;
         createInfo.pDynamicState = &dynamicStateInfo;
         createInfo.pColorBlendState = &colorBlendInfo;
 

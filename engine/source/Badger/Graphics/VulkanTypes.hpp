@@ -10,6 +10,8 @@
 
 #include "stb_image.h"
 
+#include "tiny_obj_loader.h"
+
 #include <fstream>
 #include <string>
 #include <vector>
@@ -28,6 +30,7 @@ namespace Badger {
     struct VulkanVertex {
         glm::vec3 Position;
         glm::vec3 Color;
+        glm::vec2 TexCoord;
         static std::vector<VkVertexInputBindingDescription> BindingDescriptions();
         static std::vector<VkVertexInputAttributeDescription> AttributeDescriptions();
     };
@@ -89,7 +92,9 @@ namespace Badger {
     };
 
     struct VulkanDepthResources {
-
+        VkImage Image;
+        VkDeviceMemory ImageMemory;
+        VkImageView ImageView;
     };
 
     struct VulkanFrameResources {

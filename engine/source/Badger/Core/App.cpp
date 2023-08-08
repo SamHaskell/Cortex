@@ -38,35 +38,35 @@ namespace Badger
 
         std::vector<VulkanIndex> cubeIndices = {
             //Top
-            2, 6, 7,
-            2, 3, 7,
+            0, 4, 5,
+            0, 5, 1,
 
             //Bottom
-            0, 4, 5,
-            0, 1, 5,
+            2, 7, 6,
+            2, 3, 7,
 
             //Left
-            0, 2, 6,
-            0, 4, 6,
+            6, 4, 0,
+            6, 0, 2,
 
             //Right
-            1, 3, 7,
-            1, 5, 7,
+            3, 1, 5,
+            3, 5, 7,
 
             //Front
-            0, 2, 3,
-            0, 1, 3,
+            2, 0, 1,
+            2, 1, 3,
 
             //Back
-            4, 6, 7,
-            4, 5, 7
+            7, 5, 4,
+            7, 4, 6
         };
 
         std::vector<VulkanVertex> quadVertices = {
-            {{-.5f, -.5f, .0f}, {1.0f, 1.0f, 1.0f}},
-            {{+.5f, -.5f, .0f}, {1.0f, 1.0f, 1.0f}},
-            {{+.5f, +.5f, .0f}, {1.0f, 1.0f, 1.0f}},
-            {{-.5f, +.5f, .0f}, {1.0f, 1.0f, 1.0f}},
+            {{-.5f, -.5f, .0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 0.0f}},
+            {{+.5f, -.5f, .0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 0.0f}},
+            {{+.5f, +.5f, .0f}, {1.0f, 1.0f, 1.0f}, {0.0f, 1.0f}},
+            {{-.5f, +.5f, .0f}, {1.0f, 1.0f, 1.0f}, {1.0f, 1.0f}},
         };
 
         std::vector<VulkanIndex> quadIndices = {
@@ -75,6 +75,7 @@ namespace Badger
 
         std::shared_ptr<Model> cubeModel = m_GraphicsContext->LoadModel(cubeVertices, cubeIndices);
         std::shared_ptr<Model> quadModel = m_GraphicsContext->LoadModel(quadVertices, quadIndices);
+        std::shared_ptr<Model> testModel = m_GraphicsContext->LoadModelFromOBJ("../../testbed/assets/models/viking/viking_room.obj");
 
         Entity cube = Entity::Create();
         cube.Mesh = {cubeModel};
@@ -84,17 +85,23 @@ namespace Badger
         
         Scene scene;
 
-        quad.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, -2.0f});
-        scene.Entities.push_back(quad);
+        // quad.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, -1.0f});
+        // scene.Entities.push_back(quad);
         
-        for (i32 i = -5; i < 6; i++) {
-            for (i32 j = -3; j < 4; j++) {
-                cube.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {2.0f * (f32)i, 2.0f * (f32)j, -10.0f});
-                scene.Entities.push_back(cube);
-            }
-        }
+        // for (i32 i = -40; i < 41; i++) {
+        //     for (i32 j = -30; j < 31; j++) {
+        //         cube.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {2.0f * (f32)i, 2.0f * (f32)j, -80.0f});
+        //         scene.Entities.push_back(cube);
+        //     }
+        // }
 
-        scene.MainCamera.SetView({0.0f, 0.0f, 0.0f}, {0.0f, 0.0f, -1.0f}, {0.0f, 1.0f, 0.0f});
+        Entity test = Entity::Create();
+        test.Mesh = {testModel};
+
+        test.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, 0.0f});
+        scene.Entities.push_back(test);
+
+        scene.MainCamera.SetView({1.5f, 1.5f, 1.5f}, {-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 1.0f});
 
         f64 dt = 0.0;
         auto now = std::chrono::high_resolution_clock::now();
@@ -104,10 +111,13 @@ namespace Badger
             scene.MainCamera.SetPerspectiveProjection(glm::radians(70.0f), m_AspectRatio, 0.01f, 1000.0f);
 
             for (auto& e : scene.Entities) {
-                e.Transform.ModelToWorld = glm::rotate(e.Transform.ModelToWorld, 1.0f * (f32)dt, {0.2f, 0.7f, -1.0f});
+                if (e.Mesh.Model == testModel) {
+                    e.Transform.ModelToWorld = glm::rotate(e.Transform.ModelToWorld, 0.33f * (f32)dt, {0.0f, 0.0f, 1.0f});
+                }
             }
 
             VkCommandBuffer cmd;
+            u32 frameIndex;
             if (m_GraphicsContext->BeginFrame(cmd)) {
                 m_GraphicsContext->BeginRenderPass(cmd);
                 m_Renderer->DrawScene(cmd, scene);
