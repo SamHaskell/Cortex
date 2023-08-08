@@ -22,7 +22,9 @@ namespace Badger {
         m_SwapchainSpec = vulkan_create_swapchain_spec(
                                                 m_GraphicsDevice->PhysicalDevice, 
                                                 m_GraphicsDevice->Device, 
-                                                m_GraphicsDevice->Surface, 
+                                                m_GraphicsDevice->Details.MaxMultisamplingCount,
+                                                m_GraphicsDevice->Details.DepthFormat,
+                                                m_GraphicsDevice->Surface,
                                                 (u32)window->GetFramebufferWidth(), (u32)window->GetFramebufferHeight()
                                             );
 
@@ -76,7 +78,7 @@ namespace Badger {
     bool GraphicsContext::BeginRenderPass(VkCommandBuffer commandBuffer) {
         
         std::array<VkClearValue, 2> clearValues{};
-        clearValues[0].color = {{0.0f, 0.0f, 0.0f, 1.0f}};
+        clearValues[0].color = {{0.8f, 0.8f, 0.8f, 1.0f}};
         clearValues[1].depthStencil = {1.0f, 0};
 
         VkRenderPassBeginInfo passBeginInfo = {};

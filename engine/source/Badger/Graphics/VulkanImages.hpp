@@ -23,4 +23,7 @@ namespace Badger {
 
     VulkanTexture2D vulkan_create_texture_2D(const std::shared_ptr<GraphicsDevice> device, const std::string& path);
     VulkanSampler2D vulkan_create_sampler_2D(const std::shared_ptr<GraphicsDevice> device);
+
+    void vulkan_destroy_texture_2D(const std::shared_ptr<GraphicsDevice> device, VulkanTexture2D& texture);
+    void vulkan_destroy_sampler_2D(const std::shared_ptr<GraphicsDevice> device, VulkanSampler2D& sampler);
 }

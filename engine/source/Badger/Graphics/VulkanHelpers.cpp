@@ -4,7 +4,7 @@ namespace Badger {
 
     // MISC RESOURCE CREATION
 
-    VulkanSwapchainSpecification vulkan_create_swapchain_spec(VkPhysicalDevice physicalDevice, VkDevice device, VkSurfaceKHR surface, u32 width, u32 height) {
+    VulkanSwapchainSpecification vulkan_create_swapchain_spec(VkPhysicalDevice physicalDevice, VkDevice device, VkSampleCountFlagBits samples, VkFormat depthFormat, VkSurfaceKHR surface, u32 width, u32 height) {
         VulkanSwapchainProperties properties = vulkan_query_swapchain_properties(physicalDevice, surface);
         u32 imageCount = properties.Capabilities.minImageCount + 1;
         if (properties.Capabilities.maxImageCount > 0 && imageCount > properties.Capabilities.maxImageCount)
@@ -18,6 +18,8 @@ namespace Badger {
         config.Extent = vulkan_choose_extent(properties.Capabilities, width, height);
         config.ImageCount = imageCount;
         config.CurrentTransform = properties.Capabilities.currentTransform;
+        config.MultisamplingCount = samples;
+        config.DepthFormat = depthFormat;
 
         return config;
     }
@@ -27,28 +29,33 @@ namespace Badger {
 
         VkAttachmentDescription colorAttachment = {};
         colorAttachment.format = config.SurfaceFormat.format;
-        colorAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        colorAttachment.samples = config.MultisamplingCount;
         colorAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         colorAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
         colorAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         colorAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         colorAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
-        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
+        colorAttachment.finalLayout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
 
         VkAttachmentDescription depthAttachment = {};
-        depthAttachment.format = vulkan_find_supported_format(
-            physicalDevice, 
-            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
-            VK_IMAGE_TILING_OPTIMAL,
-            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
-        );
-        depthAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        depthAttachment.format = config.DepthFormat;
+        depthAttachment.samples = config.MultisamplingCount;
         depthAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_CLEAR;
         depthAttachment.storeOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
         depthAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
         depthAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         depthAttachment.finalLayout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
+
+        VkAttachmentDescription colorResolveAttachment = {};
+        colorResolveAttachment.format = config.SurfaceFormat.format;
+        colorResolveAttachment.samples = VK_SAMPLE_COUNT_1_BIT;
+        colorResolveAttachment.loadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorResolveAttachment.storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+        colorResolveAttachment.stencilLoadOp = VK_ATTACHMENT_LOAD_OP_DONT_CARE;
+        colorResolveAttachment.stencilStoreOp = VK_ATTACHMENT_STORE_OP_DONT_CARE;
+        colorResolveAttachment.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        colorResolveAttachment.finalLayout = VK_IMAGE_LAYOUT_PRESENT_SRC_KHR;
 
         VkAttachmentReference colorAttachmentRef = {};
         colorAttachmentRef.attachment = 0;
@@ -58,11 +65,16 @@ namespace Badger {
         depthAttachmentRef.attachment = 1;
         depthAttachmentRef.layout = VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL;
 
+        VkAttachmentReference colorResolveAttachmentRef = {};
+        colorResolveAttachmentRef.attachment = 2;
+        colorResolveAttachmentRef.layout = VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL;
+
         VkSubpassDescription subpass = {};
         subpass.pipelineBindPoint = VK_PIPELINE_BIND_POINT_GRAPHICS;
         subpass.colorAttachmentCount = 1;
         subpass.pColorAttachments = &colorAttachmentRef;
         subpass.pDepthStencilAttachment = &depthAttachmentRef;
+        subpass.pResolveAttachments = &colorResolveAttachmentRef;
 
         VkSubpassDependency dependancy = {};
         dependancy.srcSubpass = VK_SUBPASS_EXTERNAL;
@@ -72,7 +84,7 @@ namespace Badger {
         dependancy.dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT | VK_PIPELINE_STAGE_EARLY_FRAGMENT_TESTS_BIT;
         dependancy.dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT | VK_ACCESS_DEPTH_STENCIL_ATTACHMENT_WRITE_BIT;
 
-        std::array<VkAttachmentDescription, 2> attachments = {colorAttachment, depthAttachment};
+        std::array<VkAttachmentDescription, 3> attachments = {colorAttachment, depthAttachment, colorResolveAttachment};
         VkRenderPassCreateInfo renderpassCreateInfo = {};
         renderpassCreateInfo.sType = VK_STRUCTURE_TYPE_RENDER_PASS_CREATE_INFO;
         renderpassCreateInfo.attachmentCount = static_cast<u32>(attachments.size());
@@ -313,6 +325,19 @@ namespace Badger {
         return trueExtent;
     }
 
+    VkSampleCountFlagBits vulkan_get_max_msaa_count(VkPhysicalDevice physicalDevice) {
+        VkPhysicalDeviceProperties properties;
+        vkGetPhysicalDeviceProperties(physicalDevice, &properties);
+        VkSampleCountFlags counts = properties.limits.framebufferColorSampleCounts & properties.limits.framebufferDepthSampleCounts;
+        if (counts & VK_SAMPLE_COUNT_64_BIT) { return VK_SAMPLE_COUNT_64_BIT; }
+        if (counts & VK_SAMPLE_COUNT_32_BIT) { return VK_SAMPLE_COUNT_32_BIT; }
+        if (counts & VK_SAMPLE_COUNT_16_BIT) { return VK_SAMPLE_COUNT_16_BIT; }
+        if (counts & VK_SAMPLE_COUNT_8_BIT) { return VK_SAMPLE_COUNT_8_BIT; }
+        if (counts & VK_SAMPLE_COUNT_4_BIT) { return VK_SAMPLE_COUNT_4_BIT; }
+        if (counts & VK_SAMPLE_COUNT_2_BIT) { return VK_SAMPLE_COUNT_2_BIT; }
+        return VK_SAMPLE_COUNT_1_BIT;
+    }
+
     void vulkan_create_instance(std::vector<const char*> validationLayers, VkInstance& outInstance) {
         ASSERT(vulkan_check_layer_support(validationLayers), "Detected Vulkan implentation does not support requested validation layers.");
 
@@ -523,16 +548,16 @@ namespace Badger {
         }
     }
     
-    void vulkan_create_swapchain_framebuffers(VkDevice device, VulkanSwapchainSpecification config, std::vector<VkImageView> swapchainImageViews, VkImageView depthImageView, VkRenderPass renderpass, std::vector<VkFramebuffer>& outFramebuffers) {
+    void vulkan_create_swapchain_framebuffers(VkDevice device, VulkanSwapchainSpecification config, std::vector<VkImageView> swapchainImageViews, VkImageView depthImageView, VkImageView colorResolveImageView, VkRenderPass renderpass, std::vector<VkFramebuffer>& outFramebuffers) {
         outFramebuffers.resize(config.ImageCount);
         for (u32 i = 0; i < config.ImageCount; i++) {
             VkImageView attachments[] = {
-                swapchainImageViews[i], depthImageView
+                colorResolveImageView, depthImageView, swapchainImageViews[i]
             };
             VkFramebufferCreateInfo framebufferCreateInfo = {};
             framebufferCreateInfo.sType = VK_STRUCTURE_TYPE_FRAMEBUFFER_CREATE_INFO;
             framebufferCreateInfo.renderPass = renderpass;
-            framebufferCreateInfo.attachmentCount = 2;
+            framebufferCreateInfo.attachmentCount = 3;
             framebufferCreateInfo.pAttachments = attachments;
             framebufferCreateInfo.width = config.Extent.width;
             framebufferCreateInfo.height = config.Extent.height;
@@ -633,7 +658,7 @@ namespace Badger {
 
     // IMAGE STUFF
 
-    void vulkan_create_image(VkDevice device, VkPhysicalDevice physicalDevice, u32 width, u32 height, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
+    void vulkan_create_image(VkDevice device, VkPhysicalDevice physicalDevice, u32 width, u32 height, VkSampleCountFlagBits samples, VkFormat format, VkImageTiling tiling, VkImageUsageFlags usage, VkMemoryPropertyFlags properties, VkImage& image, VkDeviceMemory& imageMemory) {
         VkImageCreateInfo imageInfo = {};
         imageInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
         imageInfo.imageType = VK_IMAGE_TYPE_2D;
@@ -647,7 +672,7 @@ namespace Badger {
         imageInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         imageInfo.usage = usage;
         imageInfo.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
-        imageInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        imageInfo.samples = samples;
         imageInfo.flags = 0;
 
         VkResult result = vkCreateImage(device, &imageInfo, nullptr, &image);

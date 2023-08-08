@@ -97,13 +97,13 @@ namespace Badger
 
         Entity test = Entity::Create();
         test.Mesh = {testModel};
-
         test.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, 0.0f});
         scene.Entities.push_back(test);
 
-        scene.MainCamera.SetView({1.5f, 1.5f, 1.5f}, {-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 1.0f});
+        scene.MainCamera.SetView({1.2f, 1.2f, 1.2f}, {-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 1.0f});
 
         f64 dt = 0.0;
+        f64 elapsed = 0.0;
         auto now = std::chrono::high_resolution_clock::now();
         while (m_Running) {    
             m_Window->Update(dt);
@@ -112,7 +112,7 @@ namespace Badger
 
             for (auto& e : scene.Entities) {
                 if (e.Mesh.Model == testModel) {
-                    e.Transform.ModelToWorld = glm::rotate(e.Transform.ModelToWorld, 0.33f * (f32)dt, {0.0f, 0.0f, 1.0f});
+                    e.Transform.ModelToWorld = glm::rotate(e.Transform.ModelToWorld, 0.1f * (f32)dt * (f32)glm::sin(0.5*elapsed), {0.0f, 0.0f, 1.0f});
                 }
             }
 
@@ -127,9 +127,10 @@ namespace Badger
 
             auto next = std::chrono::high_resolution_clock::now();
             dt = std::chrono::duration<f64, std::chrono::seconds::period>(next - now).count();
+            elapsed += dt;
             now = next;
 
-            // LOG_DEBUG("Frame-Time: %lfms", dt*1000.0);
+            LOG_DEBUG("Frame-Time: %lfms", dt*1000.0);
         }
 
         vkDeviceWaitIdle(m_GraphicsContext->GetDevice()->Device);

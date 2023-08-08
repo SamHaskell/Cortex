@@ -28,6 +28,9 @@ namespace Badger {
         vkDestroyPipelineLayout(m_GraphicsDevice->Device, m_PipelineLayout, nullptr);
         vkDestroyDescriptorSetLayout(m_GraphicsDevice->Device, m_MaterialDescriptorSetLayout, nullptr);
         vkDestroyDescriptorPool(m_GraphicsDevice->Device, m_MaterialDescriptorPool, nullptr);
+
+        vulkan_destroy_texture_2D(m_GraphicsDevice, m_Texture);
+        vulkan_destroy_sampler_2D(m_GraphicsDevice, m_Sampler);
     }
 
     void Renderer::DrawScene(VkCommandBuffer commandBuffer, const Scene& scene) {

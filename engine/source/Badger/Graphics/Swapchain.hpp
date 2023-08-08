@@ -22,10 +22,14 @@ namespace Badger {
             VkSwapchainKHR m_SwapchainHandle;
             VulkanSwapchainSpecification m_Spec;
             VulkanDepthResources m_DepthResources;
+            VulkanColorResources m_ColorResources;
             std::vector<VkImage> m_SwapchainImages;
             std::vector<VkImageView> m_SwapchainImageViews;
             std::vector<VkFramebuffer> m_SwapchainFramebuffers;
     };
 
     void vulkan_create_depth_resources(const std::shared_ptr<GraphicsDevice> device, VulkanSwapchainSpecification spec, VulkanDepthResources& depthResources);
+    void vulkan_create_color_resources(const std::shared_ptr<GraphicsDevice> device, VulkanSwapchainSpecification spec, VulkanColorResources& colorResources);
+    void vulkan_destroy_depth_resources(const std::shared_ptr<GraphicsDevice> device, VulkanDepthResources& depthResources);
+    void vulkan_destroy_color_resources(const std::shared_ptr<GraphicsDevice> device, VulkanColorResources& colorResources);
 }

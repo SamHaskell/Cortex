@@ -21,5 +21,6 @@ namespace Badger {
             VulkanQueueIndices QueueIndices;
             VulkanQueues Queues;
             VkCommandPool TransferCommandPool;
+            VulkanDeviceDetails Details;
     };
 }

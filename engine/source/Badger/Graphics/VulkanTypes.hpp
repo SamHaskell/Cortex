@@ -40,17 +40,6 @@ namespace Badger {
         glm::mat4 Transform;
     };
 
-    struct VulkanVertex2D {
-        glm::vec2 Position;
-        glm::vec3 Color;
-        static std::vector<VkVertexInputBindingDescription> BindingDescriptions();
-        static std::vector<VkVertexInputAttributeDescription> AttributeDescriptions();
-    };
-
-    struct VulkanPushData2D {
-        glm::mat2 Transform;
-    };
-
     struct VulkanQueueIndices {
         u32 Graphics = VULKAN_QUEUE_NOT_FOUND_INDEX;
         u32 Present = VULKAN_QUEUE_NOT_FOUND_INDEX;
@@ -78,6 +67,11 @@ namespace Badger {
         bool ComputeQueue;
     };
 
+    struct VulkanDeviceDetails {
+        VkSampleCountFlagBits MaxMultisamplingCount;
+        VkFormat DepthFormat;
+    };
+
     struct VulkanSwapchainProperties {
         VkSurfaceCapabilitiesKHR Capabilities;
         std::vector<VkSurfaceFormatKHR> Formats;
@@ -90,12 +84,20 @@ namespace Badger {
         VkExtent2D Extent;
         VkSurfaceTransformFlagBitsKHR CurrentTransform;
         u32 ImageCount;
+        VkSampleCountFlagBits MultisamplingCount;
+        VkFormat DepthFormat;
     };
 
     struct VulkanDepthResources {
         VkImage Image;
         VkDeviceMemory ImageMemory;
         VkImageView ImageView;
+    };
+
+    struct VulkanColorResources {
+        VkImage Image;
+        VkDeviceMemory ImageMemory;
+        VkImageView ImageView;    
     };
 
     struct VulkanFrameResources {

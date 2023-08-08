@@ -21,8 +21,8 @@ namespace Badger {
 
     class Pipeline {
         public:
-            static std::shared_ptr<Pipeline> Create(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath, const VulkanPipelineConfig& config);
-            Pipeline(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath, const VulkanPipelineConfig& config);
+            static std::shared_ptr<Pipeline> Create(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath, VulkanPipelineConfig& config);
+            Pipeline(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath, VulkanPipelineConfig& config);
             ~Pipeline();
             Pipeline(const Pipeline&) = delete;
             Pipeline &operator=(const Pipeline&) = delete;

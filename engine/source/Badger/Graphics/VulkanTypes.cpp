@@ -30,21 +30,4 @@ namespace Badger {
 
         return attributeDescriptions;
     }
-
-    std::vector<VkVertexInputBindingDescription> VulkanVertex2D::BindingDescriptions() {
-        std::vector<VkVertexInputBindingDescription> bindingDescriptions(1);
-        bindingDescriptions[0].binding = 0;
-        bindingDescriptions[0].inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
-        bindingDescriptions[0].stride = sizeof(VulkanVertex2D);
-        return bindingDescriptions;
-    }
-
-    std::vector<VkVertexInputAttributeDescription> VulkanVertex2D::AttributeDescriptions() {
-        std::vector<VkVertexInputAttributeDescription> attributeDescriptions(1);
-        attributeDescriptions[0].binding = 0;
-        attributeDescriptions[0].format = VK_FORMAT_R32G32_SFLOAT;
-        attributeDescriptions[0].location = 0;
-        attributeDescriptions[0].offset = offsetof(VulkanVertex2D, Position);
-        return attributeDescriptions;
-    }
 }

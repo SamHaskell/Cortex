@@ -60,11 +60,11 @@ namespace Badger {
         return config;
     }
 
-    std::shared_ptr<Pipeline> Pipeline::Create(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath, const VulkanPipelineConfig& config) {
+    std::shared_ptr<Pipeline> Pipeline::Create(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath, VulkanPipelineConfig& config) {
         return std::make_shared<Pipeline>(device, vertPath, fragPath, config);
     }
     
-    Pipeline::Pipeline(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath, const VulkanPipelineConfig& config) {
+    Pipeline::Pipeline(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath, VulkanPipelineConfig& config) {
         m_GraphicsDevice = device;
 
         ASSERT(config.PipelineLayout != VK_NULL_HANDLE, "Cannot create graphics pipeline without a valid Pipeline Layout");
@@ -90,6 +90,10 @@ namespace Badger {
 
         auto bindings = VulkanVertex::BindingDescriptions();
         auto attributes = VulkanVertex::AttributeDescriptions();
+
+
+
+        config.Multisampler.rasterizationSamples = device->Details.MaxMultisamplingCount;
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};
         vertexInputInfo.sType = VK_STRUCTURE_TYPE_PIPELINE_VERTEX_INPUT_STATE_CREATE_INFO;

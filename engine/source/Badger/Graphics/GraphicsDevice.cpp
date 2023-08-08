@@ -26,6 +26,14 @@ namespace Badger {
             Queues
         );
         TransferCommandPool = vulkan_create_command_pool(Device, QueueIndices.Transfer, VK_COMMAND_POOL_CREATE_TRANSIENT_BIT);
+
+        Details.MaxMultisamplingCount = vulkan_get_max_msaa_count(PhysicalDevice);
+        Details.DepthFormat = vulkan_find_supported_format(
+            PhysicalDevice, 
+            {VK_FORMAT_D32_SFLOAT, VK_FORMAT_D32_SFLOAT_S8_UINT, VK_FORMAT_D24_UNORM_S8_UINT},
+            VK_IMAGE_TILING_OPTIMAL,
+            VK_FORMAT_FEATURE_DEPTH_STENCIL_ATTACHMENT_BIT
+        );
     }
 
     GraphicsDevice::~GraphicsDevice() {

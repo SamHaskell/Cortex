@@ -45,6 +45,7 @@ namespace Badger {
             device->PhysicalDevice,
             width,
             height,
+            VK_SAMPLE_COUNT_1_BIT,
             texture.Format,
             VK_IMAGE_TILING_OPTIMAL,
             VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
@@ -121,5 +122,15 @@ namespace Badger {
         ASSERT(result == VK_SUCCESS, "Failed to create Vulkan texture sampler.");
 
         return sampler;
+    }
+
+    void vulkan_destroy_texture_2D(const std::shared_ptr<GraphicsDevice> device, VulkanTexture2D& texture) {
+        vkDestroyImageView(device->Device, texture.ImageView, nullptr);
+        vkFreeMemory(device->Device, texture.ImageMemory, nullptr);
+        vkDestroyImage(device->Device, texture.Image, nullptr);
+    }
+
+    void vulkan_destroy_sampler_2D(const std::shared_ptr<GraphicsDevice> device, VulkanSampler2D& sampler) {
+        vkDestroySampler(device->Device, sampler.Sampler, nullptr);
     }
 }
