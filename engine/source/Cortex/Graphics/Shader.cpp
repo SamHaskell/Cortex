@@ -48,13 +48,13 @@ namespace Cortex {
 
     void ShaderLibrary::Add(const std::shared_ptr<Shader> shader) {
         auto name = shader->GetName();
-        ASSERT(m_ShaderLookup.find(name) != m_ShaderLookup.end(), "A Shader with the same name alreasy exists.");
+        ASSERT(m_ShaderLookup.find(name) != m_ShaderLookup.end(), "A Shader with the same name already exists.");
         m_ShaderLookup[name] = shader;
     }
 
     std::shared_ptr<Shader> ShaderLibrary::Load(const std::string& name, const std::string& vertPath, const std::string& fragPath) {
         auto shader = Shader::Create(m_GraphicsDevice, vertPath, fragPath);
-        ASSERT(m_ShaderLookup.find(name) != m_ShaderLookup.end(), "A Shader with the same name alreasy exists.");
+        ASSERT(m_ShaderLookup.find(name) != m_ShaderLookup.end(), "A Shader with the same name already exists.");
         m_ShaderLookup[name] = shader;
         return shader;
     }
