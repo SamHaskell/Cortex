@@ -20,6 +20,7 @@
 #include <memory>
 #include <numeric>
 #include <chrono>
+#include <unordered_map>
 
 namespace Cortex {
 
