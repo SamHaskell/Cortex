@@ -91,8 +91,6 @@ namespace Cortex {
         auto bindings = VulkanVertex::BindingDescriptions();
         auto attributes = VulkanVertex::AttributeDescriptions();
 
-
-
         config.Multisampler.rasterizationSamples = device->Details.MaxMultisamplingCount;
 
         VkPipelineVertexInputStateCreateInfo vertexInputInfo = {};

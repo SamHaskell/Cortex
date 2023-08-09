@@ -10,6 +10,7 @@
 #include "Cortex/Graphics/Swapchain.hpp"
 #include "Cortex/Graphics/Pipeline.hpp"
 #include "Cortex/Graphics/Model.hpp"
+#include "Cortex/Graphics/Shader.hpp"
 
 namespace Cortex {
     class GraphicsContext {

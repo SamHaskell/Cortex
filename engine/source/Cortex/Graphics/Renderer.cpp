@@ -7,6 +7,7 @@ namespace Cortex {
 
     Renderer::Renderer(const std::unique_ptr<GraphicsContext>& context) {
         m_GraphicsDevice = context->GetDevice();
+        m_ShaderLibrary = ShaderLibrary::Create(m_GraphicsDevice);
 
         m_Texture = vulkan_create_texture_2D(m_GraphicsDevice, "../../testbed/assets/models/viking/viking_room.png");
         m_Sampler = vulkan_create_sampler_2D(m_GraphicsDevice);

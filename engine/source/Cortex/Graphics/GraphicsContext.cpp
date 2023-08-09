@@ -14,11 +14,8 @@ namespace Cortex {
     GraphicsContext::GraphicsContext(const std::unique_ptr<Window>& window) {
         m_MaxFrameIndex = MAX_FRAMES_IN_FLIGHT;
         m_CurrentFrameIndex = 0;
-        
         m_GraphicsDevice = GraphicsDevice::Create(defaultVulkanConfig, window);
-
         m_SwapchainSuboptimal = false;
-
         m_SwapchainSpec = vulkan_create_swapchain_spec(
                                                 m_GraphicsDevice->PhysicalDevice, 
                                                 m_GraphicsDevice->Device, 
@@ -27,10 +24,8 @@ namespace Cortex {
                                                 m_GraphicsDevice->Surface,
                                                 (u32)window->GetFramebufferWidth(), (u32)window->GetFramebufferHeight()
                                             );
-
         m_RenderPass = {vulkan_create_renderpass(m_GraphicsDevice->PhysicalDevice, m_GraphicsDevice->Device, m_SwapchainSpec)};
         m_Swapchain = Swapchain::Create(m_GraphicsDevice, m_SwapchainSpec, m_RenderPass);
-        
         m_FrameResources = vulkan_create_frame_resources(m_GraphicsDevice->Device, m_MaxFrameIndex, m_GraphicsDevice->QueueIndices.Graphics);
     }
 
@@ -62,7 +57,6 @@ namespace Cortex {
         }
 
         vkResetFences(m_GraphicsDevice->Device, 1, &frameData.InFlightFence);
-
         vkResetCommandBuffer(frameData.CommandBuffer, 0);
     
         VkCommandBufferBeginInfo beginInfo = {};

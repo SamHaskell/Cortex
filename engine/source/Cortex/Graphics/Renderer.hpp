@@ -20,8 +20,7 @@ namespace Cortex {
             void DrawScene(VkCommandBuffer commandBuffer, const Scene& scene);
         private:
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
-            // VkDescriptorSetLayout m_GlobalDescriptorSetLayout;
-            // VkDescriptorSet m_GlobalDescriptorSet;
+            std::shared_ptr<ShaderLibrary> m_ShaderLibrary;
             VkDescriptorSetLayout m_MaterialDescriptorSetLayout;
             VkDescriptorSet m_MaterialDescriptorSet;
             VkDescriptorPool m_MaterialDescriptorPool;

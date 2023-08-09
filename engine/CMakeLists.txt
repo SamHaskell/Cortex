@@ -114,6 +114,7 @@ target_link_libraries(
     ${PROJECT_NAME} PUBLIC
     glfw ${GLFW_LIBRARIES}
     vulkan
+    shaderc_combined
     spirv-cross-glsl
     spirv-cross-core
     spirv-cross-cpp
