@@ -5,8 +5,6 @@
 
 #include "Cortex/Graphics/GraphicsDevice.hpp"
 
-#include "shaderc/shaderc.hpp"
-
 namespace Cortex {
     class Shader {
         public:
@@ -16,7 +14,9 @@ namespace Cortex {
             Shader(const Shader&) = delete;
             Shader &operator=(const Shader&) = delete;
             void Compile();
-            std::string GetName();
+            void DebugPrint();
+            inline VkPipelineShaderStageCreateInfo* GetShaderStageCreateInfos() { return m_ShaderStageCreateInfos; }
+
         private:
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
             std::string m_VertPath;
@@ -30,8 +30,9 @@ namespace Cortex {
         public:
             static std::shared_ptr<ShaderLibrary> Create(std::shared_ptr<GraphicsDevice> device);
             ShaderLibrary(std::shared_ptr<GraphicsDevice> device);
-            void Add(const std::shared_ptr<Shader> shader);
+            void Add(const std::string& name, const std::shared_ptr<Shader> shader);
             std::shared_ptr<Shader> Load(const std::string& name, const std::string& vertPath, const std::string& fragPath);
+            std::shared_ptr<Shader> Get(const std::string& name);
 
         private:
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;

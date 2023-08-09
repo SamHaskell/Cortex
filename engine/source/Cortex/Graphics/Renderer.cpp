@@ -7,7 +7,10 @@ namespace Cortex {
 
     Renderer::Renderer(const std::unique_ptr<GraphicsContext>& context) {
         m_GraphicsDevice = context->GetDevice();
+
         m_ShaderLibrary = ShaderLibrary::Create(m_GraphicsDevice);
+        m_ShaderLibrary->Load("basic", "../../testbed/assets/shaders/basic.vert", "../../testbed/assets/shaders/basic.frag");
+        m_ShaderLibrary->Get("basic")->DebugPrint();
 
         m_Texture = vulkan_create_texture_2D(m_GraphicsDevice, "../../testbed/assets/models/viking/viking_room.png");
         m_Sampler = vulkan_create_sampler_2D(m_GraphicsDevice);
@@ -20,7 +23,7 @@ namespace Cortex {
         auto pipelineConfig = VulkanPipelineConfig::Default();
         pipelineConfig.RenderPass = context->GetRenderPass().Pass;
         pipelineConfig.PipelineLayout = m_PipelineLayout;
-        m_Pipeline = Pipeline::Create(m_GraphicsDevice, "../../testbed/assets/shaders/basic.vert.spv", "../../testbed/assets/shaders/basic.frag.spv", pipelineConfig);
+        m_Pipeline = Pipeline::Create(m_GraphicsDevice, m_ShaderLibrary->Get("basic"), pipelineConfig);
 
     }
 

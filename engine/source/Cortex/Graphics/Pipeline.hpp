@@ -4,6 +4,8 @@
 #include "Cortex/Graphics/VulkanTypes.hpp"
 #include "Cortex/Graphics/GraphicsDevice.hpp"
 
+#include "Cortex/Graphics/Shader.hpp"
+
 namespace Cortex {
     struct VulkanPipelineConfig {
         std::vector<VkDynamicState> DynamicStates;
@@ -21,16 +23,15 @@ namespace Cortex {
 
     class Pipeline {
         public:
-            static std::shared_ptr<Pipeline> Create(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath, VulkanPipelineConfig& config);
-            Pipeline(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath, VulkanPipelineConfig& config);
+            static std::shared_ptr<Pipeline> Create(std::shared_ptr<GraphicsDevice> device, std::shared_ptr<Shader> shader, VulkanPipelineConfig& config);
+            Pipeline(std::shared_ptr<GraphicsDevice> device, std::shared_ptr<Shader> shader, VulkanPipelineConfig& config);
             ~Pipeline();
             Pipeline(const Pipeline&) = delete;
             Pipeline &operator=(const Pipeline&) = delete;
             void Bind(VkCommandBuffer commandBuffer);
         private:
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
-            VkShaderModule m_VertexShaderModule;
-            VkShaderModule m_FragmentShaderModule;
+            std::shared_ptr<Shader> m_Shader;
             VkPipeline m_PipelineHandle;
     };
 }

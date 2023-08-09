@@ -60,33 +60,16 @@ namespace Cortex {
         return config;
     }
 
-    std::shared_ptr<Pipeline> Pipeline::Create(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath, VulkanPipelineConfig& config) {
-        return std::make_shared<Pipeline>(device, vertPath, fragPath, config);
+    std::shared_ptr<Pipeline> Pipeline::Create(std::shared_ptr<GraphicsDevice> device, std::shared_ptr<Shader> shader, VulkanPipelineConfig& config) {
+        return std::make_shared<Pipeline>(device, shader, config);
     }
     
-    Pipeline::Pipeline(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath, VulkanPipelineConfig& config) {
+    Pipeline::Pipeline(std::shared_ptr<GraphicsDevice> device, std::shared_ptr<Shader> shader, VulkanPipelineConfig& config) {
         m_GraphicsDevice = device;
+        m_Shader = shader;
 
         ASSERT(config.PipelineLayout != VK_NULL_HANDLE, "Cannot create graphics pipeline without a valid Pipeline Layout");
         ASSERT(config.RenderPass != VK_NULL_HANDLE, "Cannot create graphics pipeline without a valid RenderPass"); 
-
-        auto vertCode = vulkan_read_shader_binary(vertPath);
-        auto fragCode = vulkan_read_shader_binary(fragPath);
-
-        m_VertexShaderModule = vulkan_create_shader_module(m_GraphicsDevice->Device, vertCode);
-        m_FragmentShaderModule = vulkan_create_shader_module(m_GraphicsDevice->Device, fragCode);
-
-        VkPipelineShaderStageCreateInfo shaderStages[2];
-        shaderStages[0] = {};
-        shaderStages[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shaderStages[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-        shaderStages[0].module = m_VertexShaderModule;
-        shaderStages[0].pName = "main";
-        shaderStages[1] = {};
-        shaderStages[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
-        shaderStages[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        shaderStages[1].module = m_FragmentShaderModule;
-        shaderStages[1].pName = "main";
 
         auto bindings = VulkanVertex::BindingDescriptions();
         auto attributes = VulkanVertex::AttributeDescriptions();
@@ -116,7 +99,7 @@ namespace Cortex {
         createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         
         createInfo.stageCount = 2;
-        createInfo.pStages = shaderStages;
+        createInfo.pStages = m_Shader->GetShaderStageCreateInfos();
 
         createInfo.pVertexInputState = &vertexInputInfo;
         createInfo.pViewportState = &config.Viewport;
@@ -140,8 +123,6 @@ namespace Cortex {
     
     Pipeline::~Pipeline() {
         vkDestroyPipeline(m_GraphicsDevice->Device, m_PipelineHandle, nullptr);
-        vkDestroyShaderModule(m_GraphicsDevice->Device, m_VertexShaderModule, nullptr);
-        vkDestroyShaderModule(m_GraphicsDevice->Device, m_FragmentShaderModule, nullptr);
     }
     
     void Pipeline::Bind(VkCommandBuffer commandBuffer) {

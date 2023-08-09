@@ -5,6 +5,8 @@
 #include "vulkan/vk_enum_string_helper.h"
 #include "vulkan/vulkan.h"
 
+#include "shaderc/shaderc.hpp"
+
 #define GLFW_INCLUDE_VULKAN
 #include "GLFW/glfw3.h"
 
@@ -14,6 +16,7 @@
 
 #include <fstream>
 #include <string>
+#include <sstream>
 #include <vector>
 #include <array>
 #include <set>
@@ -109,4 +112,8 @@ namespace Cortex {
         VkCommandBuffer CommandBuffer;
     };
 
+    enum ShaderType {
+        VERTEX,
+        FRAGMENT
+    };
 }

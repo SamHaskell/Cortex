@@ -583,6 +583,19 @@ namespace Cortex {
 
     // SHADER STUFF
 
+    std::string vulkan_read_shader_source(const std::string& path) {
+        std::string code;
+        std::ifstream file(path);
+        if (!file.is_open()) {
+            ASSERT(false, "Failed to open shader source.");
+        }
+        std::stringstream stream;
+        stream << file.rdbuf();
+        file.close();
+        code = stream.str();
+        return code;
+    }
+
     std::vector<char> vulkan_read_shader_binary(const std::string& path) {
         std::ifstream file(path, std::ios::ate | std::ios::binary);
         if (!file.is_open()) {
@@ -597,11 +610,47 @@ namespace Cortex {
         return buffer;
     }
 
+    std::vector<u32> vulkan_compile_from_source(const std::string& path, ShaderType type) {
+
+        shaderc_shader_kind kind;
+        switch (type) {
+            case ShaderType::VERTEX:
+                kind = shaderc_glsl_vertex_shader;
+                break;
+            case ShaderType::FRAGMENT:
+                kind = shaderc_glsl_fragment_shader;
+                break;
+        }
+
+        shaderc::Compiler compiler;
+        shaderc::CompileOptions options;
+        std::string source = vulkan_read_shader_source(path);
+        shaderc::SpvCompilationResult result = compiler.CompileGlslToSpv(source, kind, path.c_str(), options);
+
+        if (result.GetCompilationStatus() != shaderc_compilation_status_success) {
+            LOG_ERROR("%s", result.GetErrorMessage().c_str());
+            return std::vector<u32>();
+        } else {
+            return {result.cbegin(), result.cend()};
+        }
+    }
+
     VkShaderModule vulkan_create_shader_module(VkDevice device, const std::vector<char>& code) {
         VkShaderModuleCreateInfo createInfo = {};
         createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
         createInfo.codeSize = code.size();
         createInfo.pCode = reinterpret_cast<const u32*>(code.data());
+        VkShaderModule module;
+        VkResult result = vkCreateShaderModule(device, &createInfo, nullptr, &module);
+        ASSERT(result == VK_SUCCESS, "Failed to create a Vulkan shader module!");
+        return module;
+    }
+
+    VkShaderModule vulkan_create_shader_module(VkDevice device, const std::vector<u32>& code) {
+        VkShaderModuleCreateInfo createInfo = {};
+        createInfo.sType = VK_STRUCTURE_TYPE_SHADER_MODULE_CREATE_INFO;
+        createInfo.codeSize = code.size() * 4;
+        createInfo.pCode = code.data();
         VkShaderModule module;
         VkResult result = vkCreateShaderModule(device, &createInfo, nullptr, &module);
         ASSERT(result == VK_SUCCESS, "Failed to create a Vulkan shader module!");

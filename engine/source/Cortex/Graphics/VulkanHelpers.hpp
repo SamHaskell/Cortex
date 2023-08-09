@@ -52,8 +52,11 @@ namespace Cortex {
 
     // SHADER STUFF
 
+    std::string vulkan_read_shader_source(const std::string& path);
     std::vector<char> vulkan_read_shader_binary(const std::string& path);
+    std::vector<u32> vulkan_compile_from_source(const std::string& path, ShaderType type);
     VkShaderModule vulkan_create_shader_module(VkDevice device, const std::vector<char>& code);
+    VkShaderModule vulkan_create_shader_module(VkDevice device, const std::vector<u32>& code);
 
     // BUFFER STUFF
 

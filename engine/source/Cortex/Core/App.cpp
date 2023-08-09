@@ -130,7 +130,6 @@ namespace Cortex
             elapsed += dt;
             now = next;
 
-            LOG_DEBUG("Frame-Time: %lfms", dt*1000.0);
         }
 
         vkDeviceWaitIdle(m_GraphicsContext->GetDevice()->Device);
