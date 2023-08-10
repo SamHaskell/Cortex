@@ -10,15 +10,12 @@ namespace Cortex {
             VK_KHR_SWAPCHAIN_EXTENSION_NAME
             }
         };
-
-    constexpr u32 MAX_FRAMES_IN_FLIGHT = 2;
     
     std::unique_ptr<GraphicsContext> GraphicsContext::Create(const std::unique_ptr<Window>& window) {
         return std::make_unique<GraphicsContext>(window);
     }
 
     GraphicsContext::GraphicsContext(const std::unique_ptr<Window>& window) {
-        m_MaxFrameIndex = MAX_FRAMES_IN_FLIGHT;
         m_CurrentFrameIndex = 0;
         m_GraphicsDevice = GraphicsDevice::Create(defaultVulkanConfig, window);
         m_SwapchainSuboptimal = false;
@@ -32,7 +29,7 @@ namespace Cortex {
                                             );
         m_RenderPass = {vulkan_create_renderpass(m_GraphicsDevice->PhysicalDevice, m_GraphicsDevice->Device, m_SwapchainSpec)};
         m_Swapchain = Swapchain::Create(m_GraphicsDevice, m_SwapchainSpec, m_RenderPass);
-        m_FrameResources = vulkan_create_frame_resources(m_GraphicsDevice->Device, m_MaxFrameIndex, m_GraphicsDevice->QueueIndices.Graphics);
+        m_FrameResources = vulkan_create_frame_resources(m_GraphicsDevice->Device, MAX_FRAMES_IN_FLIGHT, m_GraphicsDevice->QueueIndices.Graphics);
     }
 
     GraphicsContext::~GraphicsContext() {
@@ -140,7 +137,7 @@ namespace Cortex {
         result = m_Swapchain->PresentImage(m_GraphicsDevice->Queues.Present, frameData.RenderFinishSemaphore);
         ASSERT(result == VK_SUCCESS, "Failed to present new swapchain image!");
 
-        m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % m_MaxFrameIndex;
+        m_CurrentFrameIndex = (m_CurrentFrameIndex + 1) % MAX_FRAMES_IN_FLIGHT;
         return true;
     }
     

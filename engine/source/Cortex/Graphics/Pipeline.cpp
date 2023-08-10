@@ -99,7 +99,7 @@ namespace Cortex {
         createInfo.sType = VK_STRUCTURE_TYPE_GRAPHICS_PIPELINE_CREATE_INFO;
         
         createInfo.stageCount = 2;
-        createInfo.pStages = m_Shader->GetShaderStageCreateInfos();
+        createInfo.pStages = m_Shader->GetShaderStageCreateInfos().data();
 
         createInfo.pVertexInputState = &vertexInputInfo;
         createInfo.pViewportState = &config.Viewport;

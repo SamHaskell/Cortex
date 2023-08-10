@@ -40,10 +40,6 @@ namespace Cortex {
         static std::vector<VkVertexInputAttributeDescription> AttributeDescriptions();
     };
 
-    struct VulkanPushData {
-        glm::mat4 Transform;
-    };
-
     struct VulkanQueueIndices {
         u32 Graphics = VULKAN_QUEUE_NOT_FOUND_INDEX;
         u32 Present = VULKAN_QUEUE_NOT_FOUND_INDEX;
@@ -116,4 +112,21 @@ namespace Cortex {
         VERTEX,
         FRAGMENT
     };
+
+    ////////////////////////////////////////////////////
+    // UNIFORMS ////////////////////////////////////////
+    ////////////////////////////////////////////////////
+    
+    struct VulkanPushData {
+        glm::mat4 ModelMatrix;
+    };
+
+    struct VulkanCameraUniformData {
+        alignas(16) glm::mat4 ModelToWorldSpace;
+        alignas(16) glm::mat4 WorldToClipSpace;
+    };
+
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////
 }

@@ -5,6 +5,8 @@
 
 #include "Cortex/Graphics/GraphicsDevice.hpp"
 
+#include "spirv_cross/spirv_cross.hpp"
+
 namespace Cortex {
     class Shader {
         public:
@@ -14,16 +16,18 @@ namespace Cortex {
             Shader(const Shader&) = delete;
             Shader &operator=(const Shader&) = delete;
             void Compile();
-            void DebugPrint();
-            inline VkPipelineShaderStageCreateInfo* GetShaderStageCreateInfos() { return m_ShaderStageCreateInfos; }
+            inline const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStageCreateInfos() { return m_ShaderStageCreateInfos; }
+            void Reflect();
 
         private:
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
             std::string m_VertPath;
             std::string m_FragPath;
-            VkShaderModule m_VertexShaderModule;
-            VkShaderModule m_FragmentShaderModule;
-            VkPipelineShaderStageCreateInfo m_ShaderStageCreateInfos[2];
+            std::vector<VkPipelineShaderStageCreateInfo> m_ShaderStageCreateInfos;
+            std::unordered_map<VkShaderStageFlagBits, VkShaderModule> m_ShaderModules;
+            std::unordered_map<VkShaderStageFlagBits, std::vector<u32>> m_ShaderBinaries;
+            VkDescriptorSetLayout m_DescriptorSetLayout;
+            VkDescriptorPool m_DescriptorPool;
     };
 
     class ShaderLibrary {

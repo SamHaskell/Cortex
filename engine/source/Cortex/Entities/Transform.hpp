@@ -4,6 +4,6 @@
 
 namespace Cortex {
     struct Transform {
-        glm::mat4 ModelToWorld;
+        glm::mat4 ModelMatrix;
     };
 }

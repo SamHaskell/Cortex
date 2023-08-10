@@ -12,6 +12,8 @@
 #include "Cortex/Graphics/Model.hpp"
 #include "Cortex/Graphics/Shader.hpp"
 
+#define MAX_FRAMES_IN_FLIGHT 2U
+
 namespace Cortex {
     class GraphicsContext {
         public:
@@ -39,7 +41,6 @@ namespace Cortex {
             std::shared_ptr<Model> LoadModelFromOBJ(const std::string& path);
             
         private:
-            u32 m_MaxFrameIndex;
             u32 m_CurrentFrameIndex;
             VulkanSessionConfig m_Config;
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;

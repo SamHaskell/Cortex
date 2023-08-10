@@ -20,18 +20,20 @@ namespace Cortex {
             void DrawScene(VkCommandBuffer commandBuffer, const Scene& scene);
         private:
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
+            u32 m_CurrentFrameIndex;
             std::shared_ptr<ShaderLibrary> m_ShaderLibrary;
             VkDescriptorSetLayout m_MaterialDescriptorSetLayout;
-            VkDescriptorSet m_MaterialDescriptorSet;
+            std::vector<VkDescriptorSet> m_MaterialDescriptorSets;
             VkDescriptorPool m_MaterialDescriptorPool;
             VkPipelineLayout m_PipelineLayout;
             std::shared_ptr<Pipeline> m_Pipeline;
             VulkanTexture2D m_Texture;
+            std::vector<VulkanUniformBuffer> m_UniformBuffers;
             VulkanSampler2D m_Sampler;
     };
 
     VkDescriptorSetLayout vulkan_create_descriptor_set_layout(VkDevice device);
     VkDescriptorPool vulkan_create_descriptor_pool(VkDevice device);
-    VkDescriptorSet vulkan_create_descriptor_set(VkDevice device, VkDescriptorPool pool, const VkDescriptorSetLayout& layout, VkSampler sampler, VkImageView imageView);
+    std::vector<VkDescriptorSet> vulkan_create_descriptor_sets(VkDevice device, VkDescriptorPool pool, u32 count, const VkDescriptorSetLayout& layout, VkSampler sampler, VkImageView imageView, const std::vector<VulkanUniformBuffer>& buffers);
 
 }

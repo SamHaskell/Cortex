@@ -97,7 +97,7 @@ namespace Cortex
 
         Entity test = Entity::Create();
         test.Mesh = {testModel};
-        test.Transform.ModelToWorld = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, 0.0f});
+        test.Transform.ModelMatrix = glm::translate(glm::mat4(1.0f), {0.0f, 0.0f, 0.0f});
         scene.Entities.push_back(test);
 
         scene.MainCamera.SetView({1.2f, 1.2f, 1.2f}, {-1.0f, -1.0f, -1.0f}, {0.0f, 0.0f, 1.0f});
@@ -112,7 +112,7 @@ namespace Cortex
 
             for (auto& e : scene.Entities) {
                 if (e.Mesh.Model == testModel) {
-                    e.Transform.ModelToWorld = glm::rotate(e.Transform.ModelToWorld, 0.1f * (f32)dt * (f32)glm::sin(0.5*elapsed), {0.0f, 0.0f, 1.0f});
+                    e.Transform.ModelMatrix = glm::rotate(e.Transform.ModelMatrix, 0.1f * (f32)dt * (f32)glm::sin(0.5*elapsed), {0.0f, 0.0f, 1.0f});
                 }
             }
 

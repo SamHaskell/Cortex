@@ -115,4 +115,22 @@ namespace Cortex {
         vkDestroyBuffer(device->Device, indexBuffer.IndexBuffer, nullptr);
         vkFreeMemory(device->Device, indexBuffer.IndexBufferMemory, nullptr);
     }
+
+    std::vector<VulkanUniformBuffer> vulkan_create_uniform_buffers(const std::shared_ptr<GraphicsDevice> device, u32 count) {
+        std::vector<VulkanUniformBuffer> buffers(count);
+        VkDeviceSize bufferSize = sizeof(VulkanCameraUniformData);
+        for (u32 i = 0; i < count; i++) {
+            vulkan_create_buffer(
+                device->PhysicalDevice, 
+                device->Device,
+                bufferSize,
+                VK_BUFFER_USAGE_UNIFORM_BUFFER_BIT,
+                VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT,
+                buffers[i].UniformBuffer,
+                buffers[i].UniformBufferMemory
+            );
+            vkMapMemory(device->Device, buffers[i].UniformBufferMemory, 0, bufferSize, 0, &buffers[i].UniformBufferMapped);
+        }
+        return buffers;
+    }
 }

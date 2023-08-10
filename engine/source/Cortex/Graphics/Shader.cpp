@@ -11,37 +11,86 @@ namespace Cortex {
         m_VertPath = vertPath;
         m_FragPath = fragPath;
 
-        auto vertCode = vulkan_compile_from_source(vertPath, ShaderType::VERTEX);
-        auto fragCode = vulkan_compile_from_source(fragPath, ShaderType::FRAGMENT);
+        m_ShaderBinaries[VK_SHADER_STAGE_VERTEX_BIT] = vulkan_compile_from_source(vertPath, ShaderType::VERTEX);
+        m_ShaderBinaries[VK_SHADER_STAGE_FRAGMENT_BIT] = vulkan_compile_from_source(fragPath, ShaderType::FRAGMENT);
 
-        m_VertexShaderModule = vulkan_create_shader_module(m_GraphicsDevice->Device, vertCode);
-        m_FragmentShaderModule = vulkan_create_shader_module(m_GraphicsDevice->Device, fragCode);
+        Reflect();
+        
+        m_ShaderModules[VK_SHADER_STAGE_VERTEX_BIT] = vulkan_create_shader_module(m_GraphicsDevice->Device, m_ShaderBinaries[VK_SHADER_STAGE_VERTEX_BIT]);
+        m_ShaderModules[VK_SHADER_STAGE_FRAGMENT_BIT] = vulkan_create_shader_module(m_GraphicsDevice->Device, m_ShaderBinaries[VK_SHADER_STAGE_FRAGMENT_BIT]);
+
+        m_ShaderStageCreateInfos.resize(2);
 
         m_ShaderStageCreateInfos[0].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         m_ShaderStageCreateInfos[0].stage = VK_SHADER_STAGE_VERTEX_BIT;
-        m_ShaderStageCreateInfos[0].module = m_VertexShaderModule;
+        m_ShaderStageCreateInfos[0].module = m_ShaderModules[VK_SHADER_STAGE_VERTEX_BIT];
         m_ShaderStageCreateInfos[0].pName = "main";
 
         m_ShaderStageCreateInfos[1].sType = VK_STRUCTURE_TYPE_PIPELINE_SHADER_STAGE_CREATE_INFO;
         m_ShaderStageCreateInfos[1].stage = VK_SHADER_STAGE_FRAGMENT_BIT;
-        m_ShaderStageCreateInfos[1].module = m_FragmentShaderModule;
+        m_ShaderStageCreateInfos[1].module = m_ShaderModules[VK_SHADER_STAGE_FRAGMENT_BIT];
         m_ShaderStageCreateInfos[1].pName = "main";
-
-        // Do dome reflection here?
     }
 
     Shader::~Shader() {
-        vkDestroyShaderModule(m_GraphicsDevice->Device, m_VertexShaderModule, nullptr);
-        vkDestroyShaderModule(m_GraphicsDevice->Device, m_FragmentShaderModule, nullptr);
+        for (auto& module : m_ShaderModules) {
+            vkDestroyShaderModule(m_GraphicsDevice->Device, module.second, nullptr);
+        }
     }
 
     void Shader::Compile() {
 
     }
 
-    void Shader::DebugPrint() {
-        LOG_DEBUG("%s", m_VertPath.c_str());
-        LOG_DEBUG("%s", m_FragPath.c_str());
+    void Shader::Reflect() {
+        for (auto& stage : m_ShaderBinaries) {
+            LOG_INFO("%s", string_VkShaderStageFlagBits(stage.first));
+            spirv_cross::Compiler comp(stage.second);
+            auto resources = comp.get_shader_resources();
+
+            LOG_INFO("Uniform Buffers");
+            for (const auto& res : resources.uniform_buffers) {
+                auto& type = comp.get_type(res.base_type_id);
+                i32 memberCount = type.member_types.size();
+                u32 binding = comp.get_decoration(res.id, spv::DecorationBinding);
+                u32 size = comp.get_declared_struct_size(type);
+                const auto& name = res.name;
+                LOG_DEBUG("Name: %s, Member Count: %i, Binding: %u, Size: %u", res.name.c_str(), memberCount, binding, size);
+            }
+
+            LOG_INFO("Combined Image Samplers");
+            for (const auto& res : resources.sampled_images) {
+                auto& type = comp.get_type(res.base_type_id);
+                i32 memberCount = type.member_types.size();
+                u32 binding = comp.get_decoration(res.id, spv::DecorationBinding);
+                const auto& name = res.name;
+                LOG_DEBUG("Name: %s, Member Count: %i, Binding: %u", res.name.c_str(), memberCount, binding);
+            }
+
+            LOG_INFO("Push Constants");
+            for (const auto& res : resources.push_constant_buffers) {
+                auto& type = comp.get_type(res.base_type_id);
+                i32 memberCount = type.member_types.size();
+                u32 size = comp.get_declared_struct_size(type);
+                const auto& name = res.name;
+                LOG_DEBUG("Name: %s, Member Count: %i, Size: %u", res.name.c_str(), memberCount, size);
+            }
+        }
+
+        // VkDescriptorSetLayoutBinding someLayoutBinding = {};
+        // someLayoutBinding.binding = 0;
+        // someLayoutBinding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+        // someLayoutBinding.descriptorCount = 1;
+        // someLayoutBinding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+        // someLayoutBinding.pImmutableSamplers = nullptr;
+
+        // VkDescriptorSetLayoutCreateInfo createInfo = {};
+        // createInfo.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
+        // createInfo.bindingCount = 1;
+        // createInfo.pBindings = &someLayoutBinding;
+
+        // VkResult result = vkCreateDescriptorSetLayout(m_GraphicsDevice->Device, &createInfo, nullptr, &m_DescriptorSetLayout);
+        // ASSERT(result == VK_SUCCESS, "Failed to create descriptor set layout.");
     }
 
     std::shared_ptr<ShaderLibrary> ShaderLibrary::Create(std::shared_ptr<GraphicsDevice> device) {
