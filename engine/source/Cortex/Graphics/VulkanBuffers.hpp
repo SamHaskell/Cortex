@@ -22,6 +22,8 @@ namespace Cortex {
         VkBuffer UniformBuffer;
         VkDeviceMemory UniformBufferMemory;
         void* UniformBufferMapped;
+        u32 Binding;
+        u32 Size;
     };
 
     void vulkan_copy_buffer(const std::shared_ptr<GraphicsDevice> device, VkBuffer src, VkBuffer dst, VkDeviceSize size);

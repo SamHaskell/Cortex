@@ -129,6 +129,7 @@ namespace Cortex {
                 buffers[i].UniformBuffer,
                 buffers[i].UniformBufferMemory
             );
+            buffers[i].Size = bufferSize;
             vkMapMemory(device->Device, buffers[i].UniformBufferMemory, 0, bufferSize, 0, &buffers[i].UniformBufferMapped);
         }
         return buffers;

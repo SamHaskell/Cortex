@@ -27,13 +27,12 @@ namespace Cortex {
             VkDescriptorPool m_MaterialDescriptorPool;
             VkPipelineLayout m_PipelineLayout;
             std::shared_ptr<Pipeline> m_Pipeline;
-            VulkanTexture2D m_Texture;
+            std::shared_ptr<Texture2D> m_Texture;
             std::vector<VulkanUniformBuffer> m_UniformBuffers;
-            VulkanSampler2D m_Sampler;
     };
 
     VkDescriptorSetLayout vulkan_create_descriptor_set_layout(VkDevice device);
     VkDescriptorPool vulkan_create_descriptor_pool(VkDevice device);
-    std::vector<VkDescriptorSet> vulkan_create_descriptor_sets(VkDevice device, VkDescriptorPool pool, u32 count, const VkDescriptorSetLayout& layout, VkSampler sampler, VkImageView imageView, const std::vector<VulkanUniformBuffer>& buffers);
+    std::vector<VkDescriptorSet> vulkan_create_descriptor_sets(VkDevice device, VkDescriptorPool pool, u32 count, VkDescriptorSetLayout layout, std::shared_ptr<Texture2D> tex, const std::vector<VulkanUniformBuffer>& buffers);
 
 }

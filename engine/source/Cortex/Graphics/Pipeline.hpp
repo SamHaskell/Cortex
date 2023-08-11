@@ -15,7 +15,6 @@ namespace Cortex {
         VkPipelineMultisampleStateCreateInfo Multisampler;
         VkPipelineColorBlendAttachmentState ColorBlendAttachment;
         VkPipelineDepthStencilStateCreateInfo DepthStencil;
-        VkPipelineLayout PipelineLayout = nullptr;
         VkRenderPass RenderPass = nullptr;
         u32 SubpassIndex = 0;
         static VulkanPipelineConfig Default();
@@ -29,9 +28,11 @@ namespace Cortex {
             Pipeline(const Pipeline&) = delete;
             Pipeline &operator=(const Pipeline&) = delete;
             void Bind(VkCommandBuffer commandBuffer);
+            inline VkPipelineLayout GetLayout() { return m_PipelineLayout; }
         private:
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
             std::shared_ptr<Shader> m_Shader;
             VkPipeline m_PipelineHandle;
+            VkPipelineLayout m_PipelineLayout;
     };
 }

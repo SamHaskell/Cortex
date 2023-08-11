@@ -68,7 +68,6 @@ namespace Cortex {
         m_GraphicsDevice = device;
         m_Shader = shader;
 
-        ASSERT(config.PipelineLayout != VK_NULL_HANDLE, "Cannot create graphics pipeline without a valid Pipeline Layout");
         ASSERT(config.RenderPass != VK_NULL_HANDLE, "Cannot create graphics pipeline without a valid RenderPass"); 
 
         auto bindings = VulkanVertex::BindingDescriptions();
@@ -110,7 +109,9 @@ namespace Cortex {
         createInfo.pDynamicState = &dynamicStateInfo;
         createInfo.pColorBlendState = &colorBlendInfo;
 
-        createInfo.layout = config.PipelineLayout;
+        m_PipelineLayout = shader->GetPipelineLayout();
+        createInfo.layout = m_PipelineLayout;
+
         createInfo.renderPass = config.RenderPass;
         createInfo.subpass = 0;
 

@@ -8,46 +8,34 @@ namespace Cortex {
     Renderer::Renderer(const std::unique_ptr<GraphicsContext>& context) {
         m_GraphicsDevice = context->GetDevice();
         m_CurrentFrameIndex = 0;
-        m_ShaderLibrary = ShaderLibrary::Create(m_GraphicsDevice);
-        m_ShaderLibrary->Load("basic", "../../testbed/assets/shaders/basic.vert", "../../testbed/assets/shaders/basic.frag");
-        m_ShaderLibrary->Load("test", "../../testbed/assets/shaders/test.vert", "../../testbed/assets/shaders/test.frag");
 
-        m_Texture = vulkan_create_texture_2D(m_GraphicsDevice, "../../testbed/assets/models/viking/viking_room.png");
-        m_Sampler = vulkan_create_sampler_2D(m_GraphicsDevice);
+        m_ShaderLibrary = ShaderLibrary::Create(m_GraphicsDevice);
+        auto shader = m_ShaderLibrary->Load("basic", "../../testbed/assets/shaders/basic.vert", "../../testbed/assets/shaders/basic.frag");
+        m_Texture = Texture2D::Create(m_GraphicsDevice, "../../testbed/assets/models/viking/viking_room.png");
 
         m_UniformBuffers = vulkan_create_uniform_buffers(m_GraphicsDevice, MAX_FRAMES_IN_FLIGHT);
+        m_MaterialDescriptorSets = vulkan_create_descriptor_sets(m_GraphicsDevice->Device, shader->m_DescriptorPool, MAX_FRAMES_IN_FLIGHT, shader->m_DescriptorSetLayouts[0], m_Texture, m_UniformBuffers);
 
-        m_MaterialDescriptorSetLayout = vulkan_create_descriptor_set_layout(m_GraphicsDevice->Device);
-        m_MaterialDescriptorPool = vulkan_create_descriptor_pool(m_GraphicsDevice->Device);
-        m_MaterialDescriptorSets = vulkan_create_descriptor_sets(m_GraphicsDevice->Device, m_MaterialDescriptorPool, MAX_FRAMES_IN_FLIGHT, m_MaterialDescriptorSetLayout, m_Sampler.Sampler, m_Texture.ImageView, m_UniformBuffers);
-
-        m_PipelineLayout = vulkan_create_pipeline_layout(m_GraphicsDevice->Device, m_MaterialDescriptorSetLayout);
         auto pipelineConfig = VulkanPipelineConfig::Default();
         pipelineConfig.RenderPass = context->GetRenderPass().Pass;
-        pipelineConfig.PipelineLayout = m_PipelineLayout;
         m_Pipeline = Pipeline::Create(m_GraphicsDevice, m_ShaderLibrary->Get("basic"), pipelineConfig);
     }
 
     Renderer::~Renderer() {
         vkDeviceWaitIdle(m_GraphicsDevice->Device);
-        vkDestroyPipelineLayout(m_GraphicsDevice->Device, m_PipelineLayout, nullptr);
-        vkDestroyDescriptorSetLayout(m_GraphicsDevice->Device, m_MaterialDescriptorSetLayout, nullptr);
         vkDestroyDescriptorPool(m_GraphicsDevice->Device, m_MaterialDescriptorPool, nullptr);
-
-        vulkan_destroy_texture_2D(m_GraphicsDevice, m_Texture);
-        vulkan_destroy_sampler_2D(m_GraphicsDevice, m_Sampler);
     }
 
     void Renderer::DrawScene(VkCommandBuffer commandBuffer, const Scene& scene) {
 
         m_Pipeline->Bind(commandBuffer);
         
-        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_PipelineLayout, 0, 1, &m_MaterialDescriptorSets[m_CurrentFrameIndex], 0, nullptr);
+        vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, m_Pipeline->GetLayout(), 0, 1, &m_MaterialDescriptorSets[m_CurrentFrameIndex], 0, nullptr);
 
         for (auto& e : scene.Entities) {
-            VulkanPushData push;
-            push.ModelMatrix = scene.MainCamera.ProjectionMatrix * scene.MainCamera.ViewMatrix * e.Transform.ModelMatrix;
-            vkCmdPushConstants(commandBuffer, m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(VulkanPushData), &push);
+            // VulkanPushData push;
+            // push.ModelMatrix = scene.MainCamera.ProjectionMatrix * scene.MainCamera.ViewMatrix * e.Transform.ModelMatrix;
+            // vkCmdPushConstants(commandBuffer, m_PipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(VulkanPushData), &push);
             
             VulkanCameraUniformData cameraData;
             cameraData.ModelToWorldSpace = e.Transform.ModelMatrix;
@@ -113,9 +101,10 @@ namespace Cortex {
         return pool;
     }
 
-    std::vector<VkDescriptorSet> vulkan_create_descriptor_sets(VkDevice device, VkDescriptorPool pool, u32 count, const VkDescriptorSetLayout& layout, VkSampler sampler, VkImageView imageView, const std::vector<VulkanUniformBuffer>& buffers) {
+    std::vector<VkDescriptorSet> vulkan_create_descriptor_sets(VkDevice device, VkDescriptorPool pool, u32 count, VkDescriptorSetLayout layout, std::shared_ptr<Texture2D> tex, const std::vector<VulkanUniformBuffer>& buffers) {
+        
         std::vector<VkDescriptorSet> sets(count);
-
+        
         std::vector<VkDescriptorSetLayout> layouts(count);
         for (u32 i = 0; i < count; i++) {
             layouts[i] = layout;
@@ -131,11 +120,6 @@ namespace Cortex {
         ASSERT(result == VK_SUCCESS, "Failed to allocate Descriptor set!");
 
         for (u32 i = 0; i < count; i++) {
-            VkDescriptorImageInfo imageInfo = {};
-            imageInfo.sampler = sampler;
-            imageInfo.imageView = imageView;
-            imageInfo.imageLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
-
             VkWriteDescriptorSet write = {};
             write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
             write.dstSet = sets[i];
@@ -143,14 +127,14 @@ namespace Cortex {
             write.dstArrayElement = 0;
             write.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
             write.descriptorCount = 1;
-            write.pImageInfo = &imageInfo;
+            write.pImageInfo = &tex->GetDescriptor();
             
             vkUpdateDescriptorSets(device, 1, &write, 0, nullptr);
 
             VkDescriptorBufferInfo bufferInfo = {};
             bufferInfo.buffer = buffers[i].UniformBuffer;
             bufferInfo.offset = 0;
-            bufferInfo.range = sizeof(VulkanUniformBuffer); 
+            bufferInfo.range = buffers[i].Size; 
 
             VkWriteDescriptorSet ubo_write = {};
             ubo_write.sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;

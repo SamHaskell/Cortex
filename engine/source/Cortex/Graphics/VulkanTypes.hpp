@@ -25,8 +25,10 @@
 #include <chrono>
 #include <unordered_map>
 
+
 namespace Cortex {
 
+    #define MAX_FRAMES_IN_FLIGHT 2
     #define VULKAN_QUEUE_NOT_FOUND_INDEX std::numeric_limits<u32>::max()
 
     using VulkanIndex = u32;
@@ -108,9 +110,34 @@ namespace Cortex {
         VkCommandBuffer CommandBuffer;
     };
 
+    ////////////////////////////////////////////////////
+    // SHADERS /////////////////////////////////////////
+    ////////////////////////////////////////////////////
+
     enum ShaderType {
         VERTEX,
         FRAGMENT
+    };
+
+    struct VulkanDescriptorSpec {
+        std::string Name;
+        VkDescriptorType Type;
+        u32 Count;
+        VkShaderStageFlags Stages;
+    };
+
+    struct VulkanDescriptorSetLayoutSpec {
+        std::unordered_map<u32, VulkanDescriptorSpec> Descriptors;
+    };
+
+    struct VulkanPushConstantSpec {
+        std::string Name;
+    };
+
+    struct VulkanShaderSpec {
+        std::unordered_map<VkDescriptorType, u32> TypeCounts;
+        std::unordered_map<u32, VulkanDescriptorSetLayoutSpec> DescriptorSets;
+        std::unordered_map<VkShaderStageFlagBits, VulkanPushConstantSpec> PushConstants;
     };
 
     ////////////////////////////////////////////////////

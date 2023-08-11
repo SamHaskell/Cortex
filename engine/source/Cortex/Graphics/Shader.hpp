@@ -4,10 +4,13 @@
 #include "Cortex/Graphics/VulkanTypes.hpp"
 
 #include "Cortex/Graphics/GraphicsDevice.hpp"
+#include "Cortex/Graphics/VulkanBuffers.hpp"
+#include "Cortex/Graphics/VulkanImages.hpp"
 
 #include "spirv_cross/spirv_cross.hpp"
 
 namespace Cortex {
+
     class Shader {
         public:
             static std::shared_ptr<Shader> Create(std::shared_ptr<GraphicsDevice> device, const std::string& vertPath, const std::string& fragPath);
@@ -16,18 +19,26 @@ namespace Cortex {
             Shader(const Shader&) = delete;
             Shader &operator=(const Shader&) = delete;
             void Compile();
+            inline const VkPipelineLayout GetPipelineLayout() { return m_PipelineLayout; }
             inline const std::vector<VkPipelineShaderStageCreateInfo>& GetShaderStageCreateInfos() { return m_ShaderStageCreateInfos; }
-            void Reflect();
-
+            std::unordered_map<u32, VkDescriptorSetLayout> m_DescriptorSetLayouts;
+            VkDescriptorPool m_DescriptorPool;
         private:
+            VulkanShaderSpec Reflect();
+            void CreateDescriptorPool();
+            void CreateDescriptorSetLayouts();
+            void CreatePipelineLayout();
+
             std::shared_ptr<GraphicsDevice> m_GraphicsDevice;
             std::string m_VertPath;
             std::string m_FragPath;
             std::vector<VkPipelineShaderStageCreateInfo> m_ShaderStageCreateInfos;
             std::unordered_map<VkShaderStageFlagBits, VkShaderModule> m_ShaderModules;
             std::unordered_map<VkShaderStageFlagBits, std::vector<u32>> m_ShaderBinaries;
-            VkDescriptorSetLayout m_DescriptorSetLayout;
-            VkDescriptorPool m_DescriptorPool;
+            VulkanShaderSpec m_ShaderSpec;
+            std::vector<VulkanUniformBuffer> m_UniformBuffers;
+            std::vector<std::shared_ptr<Texture2D>> m_ImageSamplers;
+            VkPipelineLayout m_PipelineLayout;
     };
 
     class ShaderLibrary {

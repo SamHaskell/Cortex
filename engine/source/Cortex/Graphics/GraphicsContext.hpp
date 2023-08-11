@@ -12,8 +12,6 @@
 #include "Cortex/Graphics/Model.hpp"
 #include "Cortex/Graphics/Shader.hpp"
 
-#define MAX_FRAMES_IN_FLIGHT 2U
-
 namespace Cortex {
     class GraphicsContext {
         public:
