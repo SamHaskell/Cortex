@@ -1,5 +1,5 @@
 # Cortex
-Cortex Engine - A Vulkan based 3D renderer and Game Engine, currently being built for MacOS.
+A Vulkan based 3D renderer and Game Engine, currently being built for MacOS.
 
 ### 8/8/2023
 
