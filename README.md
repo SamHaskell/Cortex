@@ -3,7 +3,7 @@ A Vulkan based 3D renderer and Game Engine, currently being built for MacOS.
 
 ### 8/8/2023
 
-Currently I'm working on the renderer, which has been a massive learning experience and pain in the bum. 
+Currently I'm working on the renderer, which has been a massive learning experience. 
 I've managed to get models loaded from .obj, painted with a texture, and displayed to the screen. 
 The next step is to refine the API somewhat and introduce a basic material system, to get ready for the introduction of lighting. 
 Once we have multiple objects rendered, each with their own materials/material instances, 
